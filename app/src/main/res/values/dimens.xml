@@ -20,4 +20,5 @@
     <dimen name="alphabet_width">30dp</dimen>
     <dimen name="alphabet_padding">2dp</dimen>
     <dimen name="contact_edit_dist">10dp</dimen>
+    <dimen name="edit_dist_left">6dp</dimen>
 </resources>

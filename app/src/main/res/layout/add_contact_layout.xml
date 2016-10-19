@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="20dp">
 
@@ -21,7 +23,10 @@
             android:textColor="#ff0000"/>
         <EditText
             android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
+            android:maxLength="10"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:maxLines="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -41,11 +46,55 @@
             android:text="*"
             android:textColor="#ff0000"/>
         <EditText
+            android:id="@+id/add_contact_email"
+            android:layout_marginLeft="@dimen/edit_dist_left"
             android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
+            android:maxLines="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/phone_add"
+            android:text="添加电话"
+
+            android:textColor="#0066dd"
+            android:gravity="center_vertical"/>
+
+        <EditText
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:ems="10"
+            android:id="@+id/add_contact_phone"
+            android:inputType="phone"
+            android:layout_gravity="center_vertical"
+            android:textColorHint="#0088cc"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="备注信息"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/small_space"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/main_bg_gray"></View>
     <LinearLayout
         android:layout_marginTop="@dimen/contact_edit_dist"
         android:layout_marginBottom="@dimen/contact_edit_dist"
@@ -58,26 +107,11 @@
             android:text="公司"/>
 
         <EditText
+            android:layout_marginLeft="@dimen/edit_dist_left"
             android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
+            android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_marginTop="@dimen/contact_edit_dist"
-        android:layout_marginBottom="@dimen/contact_edit_dist"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="公司"/>
-
-        <EditText
-            android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
-            android:layout_width="0dp"
+            android:maxLines="1"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
@@ -92,9 +126,11 @@
             android:text="部门"/>
 
         <EditText
+            android:layout_marginLeft="@dimen/edit_dist_left"
             android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
+            android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
+            android:maxLines="1"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
@@ -109,9 +145,11 @@
             android:text="职位"/>
 
         <EditText
+            android:layout_marginLeft="@dimen/edit_dist_left"
             android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
+            android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
+            android:maxLines="1"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
@@ -126,9 +164,11 @@
             android:text="地址"/>
 
         <EditText
+            android:layout_marginLeft="@dimen/edit_dist_left"
             android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
+            android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
+            android:maxLines="1"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
@@ -143,8 +183,9 @@
             android:text="其他"/>
 
         <EditText
+            android:layout_marginLeft="@dimen/edit_dist_left"
             android:layout_weight="1"
-            android:background="@drawable/edit_text_bg"
+            android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
