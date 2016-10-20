@@ -40,4 +40,11 @@ public class EditTestFragment extends Fragment {
         Fragment fragment=new AddExistContactFragment();
         mainActivity.openFragment(fragment);
     }
+
+    @OnClick(R.id.open_contacts)
+    void openContacts(){
+        MainActivity mainActivity=(MainActivity)getActivity();
+        Fragment fragment=new ContactListFragment();
+        mainActivity.openFragment(fragment);
+    }
 }

@@ -48,17 +48,11 @@ public class AddContactFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
         inflater.inflate(R.menu.menu_add_new_contact,menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                if (getActivity() != null) {
-                    getActivity().onBackPressed();
-                }
-                break;
-            case R.id.menu_add_done:
+        final MenuItem menuItem=menu.findItem(R.id.menu_add_done);
+        menuItem.setActionView(R.layout.menu_add_done_layout);
+        menuItem.getActionView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 boolean isValid=true;
                 if(!Format.isValidEmail(email.getText())){
                     email.setError("email invalid.");
@@ -67,6 +61,17 @@ public class AddContactFragment extends Fragment {
                 if(!Format.isValidPhone(phone.getText())){
                     phone.setError("phone invalid.");
                     isValid=false;
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (getActivity() != null) {
+                    getActivity().onBackPressed();
                 }
                 break;
             default:

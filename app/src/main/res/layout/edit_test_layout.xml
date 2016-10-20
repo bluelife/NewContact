@@ -14,4 +14,9 @@
         android:layout_height="wrap_content"
         android:text="open_exist"
         android:id="@+id/edit_test_exist"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="open_contacts"
+        android:id="@+id/open_contacts"/>
 </LinearLayout>

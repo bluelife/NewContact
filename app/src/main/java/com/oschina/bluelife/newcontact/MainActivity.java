@@ -4,10 +4,16 @@ package com.oschina.bluelife.newcontact;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.TextView;
+
+import com.oschina.bluelife.newcontact.Utils.Format;
+import com.oschina.bluelife.newcontact.Utils.UIHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        /*TextView title= UIHelper.getToolbarTitleView(this,toolbar);
+        Log.w("ddd",title.getParent()+"");
+        Toolbar.LayoutParams layoutParams=new Toolbar.LayoutParams(Gravity.CENTER);
+        title.setLayoutParams(layoutParams);
+        title.setGravity(Gravity.CENTER);*/
+        int index="☆".charAt(0);
+        int index1="B".charAt(0);
+        Log.w("ssss",index+","+index1);
     }
 
 
