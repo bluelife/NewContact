@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="10dp"
     android:layout_marginTop="10dp"
-    android:layout_marginBottom="10dp">
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/contact_list_item_bg">
     <ImageView
         app:srcCompat="@drawable/avatar"
         android:layout_gravity="center"

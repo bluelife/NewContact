@@ -5,4 +5,18 @@
     <string name="menu_contact_edit">编辑</string>
     <string name="menu_view_contact_edit">编辑</string>
     <string name="edit_contact_del">删除联系人</string>
+    <string name="contact_list_most_connect">常用联系人</string>
+    <string name="menu_del_contact_label">删除</string>
+    <string name="select_count">共选择了%1$d个</string>
+    <string name="mobilephone_label">手机：</string>
+    <string name="linephone_label">电话：</string>
+    <string name="email_label">邮箱：</string>
+    <string name="website_label">网址：</string>
+    <string name="address_label">地址：</string>
+    <string name="business_card_title">我的二维码名片</string>
+    <string name="edit_contact_title">编辑联系人</string>
+    <string name="edit_card_title">编辑名片</string>
+    <string name="add_new_contact_title">新增联系人</string>
+    <string name="exist_contact_title">联系人信息</string>
+    <string name="contact_list_title">联系人</string>
 </resources>

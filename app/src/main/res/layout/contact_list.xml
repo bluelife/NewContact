@@ -21,6 +21,14 @@
 
 
 
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="20dp"
+            android:id="@+id/list_contacts">
+
+        </android.support.v7.widget.RecyclerView>
         <com.oschina.bluelife.newcontact.widget.RecyclerViewFastScroller
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -29,12 +37,5 @@
             android:id="@+id/fastscroller">
 
         </com.oschina.bluelife.newcontact.widget.RecyclerViewFastScroller>
-        <android.support.v7.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toLeftOf="@id/fastscroller"
-            android:id="@+id/list_contacts">
-
-        </android.support.v7.widget.RecyclerView>
     </RelativeLayout>
 </LinearLayout>

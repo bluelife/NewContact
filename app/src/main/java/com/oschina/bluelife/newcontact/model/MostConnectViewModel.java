@@ -1,5 +1,6 @@
 package com.oschina.bluelife.newcontact.model;
 
+import com.oschina.bluelife.newcontact.R;
 import com.oschina.bluelife.newcontact.Utils.Const;
 
 import java.util.List;
@@ -19,6 +20,16 @@ public class MostConnectViewModel implements ContactViewModel {
     }
     @Override
     public String getSortCode() {
-        return Const.getStarAscii();
+        return Const.STAR;
+    }
+
+    @Override
+    public boolean selectable() {
+        return false;
+    }
+
+    @Override
+    public int getType() {
+        return R.layout.contact_sub_list;
     }
 }

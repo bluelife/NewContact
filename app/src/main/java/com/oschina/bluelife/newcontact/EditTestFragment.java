@@ -18,33 +18,53 @@ import butterknife.OnClick;
 public class EditTestFragment extends Fragment {
 
     private static String TAG= "edittest";
+    MainActivity mainActivity;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.edit_test_layout,container,false);
         ButterKnife.bind(this,view);
+        mainActivity=(MainActivity)getActivity();
         return view;
     }
 
     @OnClick(R.id.edit_test_new)
     void openAddPeople(){
         Log.w(TAG, "openAddPeople: ");
-        MainActivity mainActivity=(MainActivity)getActivity();
         Fragment fragment=new AddContactFragment();
         mainActivity.openFragment(fragment);
     }
 
     @OnClick(R.id.edit_test_exist)
     void openAddExist(){
-        MainActivity mainActivity=(MainActivity)getActivity();
         Fragment fragment=new AddExistContactFragment();
         mainActivity.openFragment(fragment);
     }
 
     @OnClick(R.id.open_contacts)
     void openContacts(){
-        MainActivity mainActivity=(MainActivity)getActivity();
         Fragment fragment=new ContactListFragment();
+        mainActivity.openFragment(fragment);
+    }
+
+    @OnClick(R.id.create_qrcode)
+    void openCreatedQRCode(){
+        Bundle bundle=new Bundle();
+        bundle.putInt(BusinessCardFragment.KEY_INDEX,0);
+        bundle.putInt(BusinessCardFragment.KEY_ICON,R.drawable.twitter_small);
+        Fragment fragment=new BusinessCardFragment();
+        fragment.setArguments(bundle);
+        mainActivity.openFragment(fragment);
+    }
+    @OnClick(R.id.open_qrcode)
+    void openQRCode(){
+        Fragment fragment=new EditQRcodeFragment();
+        mainActivity.openFragment(fragment);
+    }
+
+    @OnClick(R.id.scan_qrcode)
+    void openScan(){
+        Fragment fragment=new ScanQRFragment();
         mainActivity.openFragment(fragment);
     }
 }

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="20dp">
+
+    <ImageView
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="0dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/youtube_small"
+        android:id="@+id/add_qrcode_icon"
+        android:layout_gravity="center_horizontal"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="姓名"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="*"
+            android:textColor="#ff0000"/>
+        <EditText
+            android:id="@+id/add_qrcode_name"
+            android:layout_weight="1"
+            android:maxLength="10"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:maxLines="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="邮箱"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="*"
+            android:textColor="#ff0000"/>
+        <EditText
+            android:id="@+id/add_qrcode_email"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:text="3355802@qq.com"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="公司"/>
+
+        <EditText
+            android:id="@+id/add_qrcode_company"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="手机"/>
+
+        <EditText
+            android:id="@+id/add_qrcode_mobile"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="座机"/>
+
+        <EditText
+            android:id="@+id/add_qrcode_line"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="职位"/>
+
+        <EditText
+            android:id="@+id/add_qrcode_place"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="地址"/>
+
+        <EditText
+            android:id="@+id/add_qrcode_address"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="网址"/>
+
+        <EditText
+            android:id="@+id/add_qrcode_website"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/add_qrcode_extra"
+        android:text="添加其他项"
+        android:gravity="center"
+        android:textColor="#0066cc"/>
+</LinearLayout>
+</ScrollView>

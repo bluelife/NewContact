@@ -9,7 +9,10 @@
     <color name="alphabet_background_color">#F5F5F5</color>
     <color name="alphabet_background_border_color">#9E9E9E</color>
     <color name="main_bg_gray">#ececec</color>
+    <color name="main_bg_gray2">#333333</color>
     <color name="menu_bg">#57c750</color>
     <color name="menu_bg_select">#57ccff</color>
     <color name="text_blue">#3a6c92</color>
+    <color name="windows_bg">#ffffff</color>
+    <color name="vcard_bg">#72AAD6</color>
 </resources>

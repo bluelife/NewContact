@@ -6,4 +6,6 @@ package com.oschina.bluelife.newcontact.model;
 
 public interface ContactViewModel {
     String getSortCode();
+    int getType();
+    boolean selectable();
 }

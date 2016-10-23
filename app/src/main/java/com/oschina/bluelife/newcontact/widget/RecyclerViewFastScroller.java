@@ -71,7 +71,7 @@ public class RecyclerViewFastScroller extends LinearLayout {
         final LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(layoutResId, this, true);
         bubble = (TextView) findViewById(bubbleResId);
-        //bubble.setVisibility(INVISIBLE);
+        bubble.setVisibility(INVISIBLE);
         handle = findViewById(handleResId);
 
         //Alphabet
@@ -91,7 +91,7 @@ public class RecyclerViewFastScroller extends LinearLayout {
         final int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                if (event.getX() < ViewCompat.getY(handle) - ViewCompat.getPaddingStart(handle))
+                if (event.getX() < ViewCompat.getX(handle) - ViewCompat.getPaddingStart(handle))
                     return false;
 
                 if (bubble != null && bubble.getVisibility() == INVISIBLE)
@@ -131,7 +131,7 @@ public class RecyclerViewFastScroller extends LinearLayout {
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    //bubble.setVisibility(INVISIBLE);
+                    bubble.setVisibility(INVISIBLE);
                     //clearAllAlphabetWorkSelected();
                 }
             }
@@ -222,6 +222,16 @@ public class RecyclerViewFastScroller extends LinearLayout {
         alphabetAdapter = new AlphabetAdapter(getContext(), alphabets);
         alphabetAdapter.setOnItemClickListener(new OnAlphabetItemClickListener());
         alphabetRecyclerView.setAdapter(alphabetAdapter);
+    }
+    public void updateData(){
+        /*for (int i = 0; i < alphabets.size(); i++) {
+            if(word.equalsIgnoreCase(alphabets.get(i).word)){
+                alphabets.remove(i);
+
+                break;
+            }
+        }*/
+        alphabetAdapter.notifyDataSetChanged();
     }
 
     private class AlphabetTouchListener implements OnTouchListener {

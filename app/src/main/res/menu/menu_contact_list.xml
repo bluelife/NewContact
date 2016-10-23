@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_contact_search"
+        android:icon="@drawable/action_search"
+        app:showAsAction="ifRoom"
+        android:title="search">
+    </item>
+    <item
+        android:id="@+id/menu_contact_add"
+        android:icon="@drawable/menu_contact_add"
+        app:showAsAction="ifRoom"
+        android:title="add">
+    </item>
+</menu>

@@ -26,7 +26,7 @@ public class Format {
     }
     public static boolean isAlphabet(String word){
         int code=word.toUpperCase().charAt(0);
-        return code<65||code>90;
+        return code>=65&&code<=90;
     }
     public static String getPingYin(String inputString) {
         HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();

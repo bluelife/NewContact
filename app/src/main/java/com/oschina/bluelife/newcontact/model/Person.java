@@ -1,5 +1,6 @@
 package com.oschina.bluelife.newcontact.model;
 
+import com.oschina.bluelife.newcontact.Utils.Const;
 import com.oschina.bluelife.newcontact.Utils.Format;
 
 /**
@@ -10,12 +11,17 @@ public class Person {
     public String name;
     public String email;
     public String icon;
+    public String phone;
     public String company;
     public String department;
     public String address;
-    public String extro;
+    public String extra;
+    public String place;
     public int connectCount;
     public String spell;
+    public Person(){
+
+    }
     public Person(String name,String email,String icon){
         this.name=name;
         this.email=email;
@@ -24,6 +30,8 @@ public class Person {
     }
 
     public String getSpellFirstWord(){
-        return spell.substring(0,1);
+        String word=spell.substring(0,1).toUpperCase();
+        return Format.isAlphabet(word)?word: Const.CRAP;
+
     }
 }

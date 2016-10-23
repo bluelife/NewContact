@@ -16,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <ImageView
+            android:id="@+id/contact_view_avatar"
             app:srcCompat="@drawable/contacts_contactslist_head"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -15,6 +15,10 @@ import android.widget.TextView;
 import com.oschina.bluelife.newcontact.Utils.Format;
 import com.oschina.bluelife.newcontact.Utils.UIHelper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -55,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
         title.setGravity(Gravity.CENTER);*/
         int index="☆".charAt(0);
         int index1="B".charAt(0);
-        Log.w("ssss",index+","+index1);
+
+
     }
 
 
@@ -68,4 +73,5 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
 
     }
+
 }
