@@ -1,6 +1,7 @@
 package com.oschina.bluelife.newcontact;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -49,7 +50,7 @@ public class BusinessCardFragment extends Fragment {
     public static String KEY_INDEX="index";
     public static String KEY_ICON="icon";
     int index;
-    int resId;
+    String resId;
 
     @Nullable
     @Override
@@ -62,7 +63,7 @@ public class BusinessCardFragment extends Fragment {
         Bundle bundle=getArguments();
         if(null!=bundle) {
             index = bundle.getInt(KEY_INDEX);
-            resId = bundle.getInt(KEY_ICON);
+            resId = bundle.getString(KEY_ICON);
         }
         return view;
     }
@@ -79,13 +80,26 @@ public class BusinessCardFragment extends Fragment {
         }
         return super.onOptionsItemSelected(item);
     }
+    private Bitmap getIcon(){
+        Bitmap bmp;
+        if(resId!=null){
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            Bitmap bitmap = BitmapFactory.decodeFile(resId,bmOptions);
+            bmp = Bitmap.createScaledBitmap(bitmap,Const.ICON_SIZE,Const.ICON_SIZE,true);
+        }
+        else{
+            bmp = ((BitmapDrawable) ContextCompat.getDrawable(getActivity(),
+                    R.drawable.youtube_small)).getBitmap();
+        }
+        return bmp;
+    }
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         String info= Const.getQRContent();
-        Bitmap bmp = ((BitmapDrawable) ContextCompat.getDrawable(getActivity(),
-                resId)).getBitmap();
-        QRCodeEncoder qrCodeEncoder=new QRCodeEncoder(info,320,bmp);
+
+        Bitmap bmp = getIcon();
+        QRCodeEncoder qrCodeEncoder=new QRCodeEncoder(info,Const.ICON_SIZE,bmp);
         try {
             Bitmap bitmap=qrCodeEncoder.encodeAsBitmap();
             cardView.setImageBitmap(bitmap);

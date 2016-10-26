@@ -1,12 +1,15 @@
 package com.oschina.bluelife.newcontact;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,10 +19,18 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.oschina.bluelife.newcontact.Utils.FileUtils;
 import com.oschina.bluelife.newcontact.Utils.Format;
 import com.oschina.bluelife.newcontact.model.BusinessCardSource;
 import com.oschina.bluelife.newcontact.model.Vcard;
 import com.theartofdev.edmodo.cropper.CropImage;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -53,6 +64,7 @@ public class EditQRcodeFragment extends Fragment {
     ImageView icon;
     private static final int REQUEST_PICK_FROM_FILE = 2;
     private static final int REQUEST_CROP_INTENT = 3;
+    private String imagePath;
 
 
     @Nullable
@@ -106,7 +118,7 @@ public class EditQRcodeFragment extends Fragment {
                     BusinessCardSource.get().addCard(vcard);
                     Bundle bundle=new Bundle();
                     bundle.putInt(BusinessCardFragment.KEY_INDEX,BusinessCardSource.get().getLastIndex());
-                    bundle.putInt(BusinessCardFragment.KEY_ICON,R.drawable.youtube_small);
+                    bundle.putString(BusinessCardFragment.KEY_ICON,imagePath);
                     MainActivity mainActivity=(MainActivity)getActivity();
                     BusinessCardFragment fragment=new BusinessCardFragment();
                     fragment.setArguments(bundle);
@@ -138,7 +150,11 @@ public class EditQRcodeFragment extends Fragment {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 Uri resultUri = result.getUri();
-
+                String fileName=resultUri.getPath().substring(resultUri.getPath().lastIndexOf(File.separator));
+                imagePath=resultUri.getPath();
+                //imagePath= FileUtils.getImagePath(getActivity().getContentResolver(),resultUri);
+                Log.w("rrrr",imagePath+" "+resultUri.getPath());
+                //storeImage(result.getBitmap());
                 icon.setImageURI(resultUri);
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
@@ -157,5 +173,41 @@ public class EditQRcodeFragment extends Fragment {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+    private void storeImage(Bitmap image) {
+        File pictureFile = getOutputMediaFile();
+        if (pictureFile == null) {
+
+            return;
+        }
+        try {
+            FileOutputStream fos = new FileOutputStream(pictureFile);
+            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            fos.close();
+            imagePath=pictureFile.getAbsolutePath();
+        } catch (FileNotFoundException e) {
+
+        } catch (IOException e) {
+
+        }
+
+    }
+    private File getOutputMediaFile(){
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory()
+                + "/Android/data/"
+                + getActivity().getApplicationContext().getPackageName()
+                + "/Files");
+
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                return null;
+            }
+        }
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmm").format(new Date());
+        File mediaFile;
+        String mImageName="MI_"+ timeStamp +".jpg";
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+        return mediaFile;
     }
 }
