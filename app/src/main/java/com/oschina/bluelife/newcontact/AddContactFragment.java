@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.Utils.Format;
 import com.oschina.bluelife.newcontact.model.ContactSource;
 import com.oschina.bluelife.newcontact.model.Person;
@@ -86,13 +87,16 @@ public class AddContactFragment extends Fragment {
                 if(isValid){
                     Person person=new Person();
                     person.name=name.getText().toString();
+                    person.phone=phone.getText().toString();
                     person.email=email.getText().toString();
                     person.address=address.getText().toString();
                     person.company=company.getText().toString();
                     person.department=department.getText().toString();
+                    person.title=place.getText().toString();
                     person.extra=extra.getText().toString();
                     person.spell=Format.getPingYin(person.name);
-                    ContactSource.getInstance().addContact(person);
+                    //ContactSource.getInstance().addContact(person);
+                    ContactManager.insert(getActivity().getContentResolver(),person);
                     MainActivity mainActivity=(MainActivity)getActivity();
                     mainActivity.openFragment(new ContactListFragment());
                 }

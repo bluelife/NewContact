@@ -13,11 +13,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.oschina.bluelife.newcontact.R;
 import com.oschina.bluelife.newcontact.model.ContactViewModel;
 import com.oschina.bluelife.newcontact.model.MostConnectViewModel;
 import com.oschina.bluelife.newcontact.model.PersonViewModel;
 import com.oschina.bluelife.newcontact.model.SectionViewModel;
+import com.oschina.bluelife.newcontact.widget.transform.RoundedCornersTransformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,7 +177,9 @@ public class ContactListAdapter extends RecyclerView.Adapter<BaseViewHolder> imp
             ViewCompat.setActivated(rootView,selectedItems.get(pos,false));
 
             if(null!=model.getPerson().icon) {
-                avatar.setImageURI(Uri.parse(model.getPerson().icon));
+                Glide.with(context).load(model.getPerson().icon)
+                        .bitmapTransform(new RoundedCornersTransformation(context,10,2)).into(avatar);
+                //avatar.setImageURI(Uri.parse(model.getPerson().icon));
                 Log.w("tttttttt", model.getPerson().icon);
             }
             email.setText(model.getPerson().email);

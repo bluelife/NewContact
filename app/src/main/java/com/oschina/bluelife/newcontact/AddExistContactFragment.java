@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,7 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import butterknife.BindView;
@@ -28,6 +31,10 @@ import static android.app.Activity.RESULT_OK;
  */
 
 public class AddExistContactFragment extends Fragment {
+    @BindView(R.id.contact_exist_email)
+    TextView email;
+    @BindView(R.id.contact_exist_name)
+    TextView name;
     @BindView(R.id.contact_view_avatar)
     ImageView avatar;
     private static final int REQUEST_PICK_FROM_FILE = 2;
@@ -42,6 +49,13 @@ public class AddExistContactFragment extends Fragment {
         Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.exist_contact_title));
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        boolean hasContact= ContactManager.contactExists(getActivity().getContentResolver(),"a1");
+        Log.w("has",hasContact+"");
     }
 
     @OnClick(R.id.contact_view_avatar)
