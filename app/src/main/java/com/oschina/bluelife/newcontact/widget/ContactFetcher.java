@@ -1,0 +1,265 @@
+package com.oschina.bluelife.newcontact.widget;
+
+import android.content.Context;
+
+import android.database.Cursor;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.Organization;
+
+import android.support.v4.content.CursorLoader;
+import android.util.Log;
+
+import com.oschina.bluelife.newcontact.model.Person;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by slomka.jin on 2016/11/1.
+ */
+
+public class ContactFetcher {
+    private final Context context;
+
+    public ContactFetcher(Context c) {
+        this.context = c;
+    }
+
+    public ArrayList<Person> fetchAll() {
+        String[] projectionFields = new String[]{
+                ContactsContract.Contacts._ID,
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.Contacts.TIMES_CONTACTED
+        };
+        ArrayList<Person> listContacts = new ArrayList<>();
+        CursorLoader cursorLoader = new CursorLoader(context,
+                ContactsContract.Contacts.CONTENT_URI,
+                projectionFields, // the columns to retrieve
+                null, // the selection criteria (none)
+                null, // the selection args (none)
+                "upper(" + Phone.DISPLAY_NAME + ") ASC" // the sort order (default)
+        );
+
+        Cursor c = cursorLoader.loadInBackground();
+
+        final Map<String, Person> contactsMap = new HashMap<>(c.getCount());
+
+        if (c.moveToFirst()) {
+
+            int idIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
+            int nameIndex = c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+
+            do {
+                String contactId = c.getString(idIndex);
+
+                String contactDisplayName = c.getString(nameIndex);
+                Person person = new Person(contactDisplayName,"","");
+                person.id = contactId;
+                person.rowId=getRawContactId(contactId);
+                contactsMap.put(contactId, person);
+                listContacts.add(person);
+                matchOrg(contactsMap, contactId);
+                matchNote(person, contactId);
+                matchAddress(person,contactId);
+                matchWebsite(person,contactId);
+            } while (c.moveToNext());
+        }
+
+        c.close();
+
+        matchContactNumbers(contactsMap);
+        matchContactEmails(contactsMap);
+        for (int i = 0; i < listContacts.size(); i++) {
+            Person person = listContacts.get(i);
+            Log.w("contact", person.toString());
+        }
+        return listContacts;
+    }
+    public String getRawContactId(String contactId)
+    {
+        String[] projection=new String[]{ContactsContract.RawContacts._ID};
+        String selection=ContactsContract.RawContacts.CONTACT_ID+"=?";
+        String[] selectionArgs=new String[]{contactId};
+        Cursor c=context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI,projection,selection,selectionArgs , null);
+        if(c.moveToFirst()) {
+            String rawContactId = c.getString(c.getColumnIndex(ContactsContract.RawContacts._ID));
+            Log.d("raww", "Contact Id: " + contactId + " Raw Contact Id: " + rawContactId);
+            return rawContactId;
+        }
+        c.close();
+        return "-1";
+    }
+    public void matchContactNumbers(Map<String, Person> contactsMap) {
+        // Get numbers
+        final String[] numberProjection = new String[]{
+                Phone.NUMBER,
+                Phone.TYPE,
+                Phone.LABEL,
+                Phone.CONTACT_ID,
+                Phone.PHOTO_URI
+        };
+
+        Cursor phone = new CursorLoader(context,
+                Phone.CONTENT_URI,
+                numberProjection,
+                null,
+                null,
+                null).loadInBackground();
+
+        if (phone != null) {
+            if (phone.moveToFirst()) {
+                final int contactNumberColumnIndex = phone.getColumnIndex(Phone.NUMBER);
+                final int contactTypeColumnIndex = phone.getColumnIndex(Phone.TYPE);
+                final int contactIdColumnIndex = phone.getColumnIndex(Phone.CONTACT_ID);
+                final int contactPhotoIndex=phone.getColumnIndex(Phone.PHOTO_URI);
+                final int contactPhoneLabel=phone.getColumnIndex(Phone.LABEL);
+
+                while (!phone.isAfterLast()) {
+                    final String number = phone.getString(contactNumberColumnIndex);
+                    final String contactId = phone.getString(contactIdColumnIndex);
+                    final String image=phone.getString(contactPhotoIndex);
+                    Person person = contactsMap.get(contactId);
+                    if (person == null) {
+                        continue;
+                    }
+                    final int type = phone.getInt(contactTypeColumnIndex);
+                    String customLabel =  phone.getString(contactPhoneLabel);
+                    CharSequence phoneType = Phone.getTypeLabel(context.getResources(), type,customLabel);
+                    //Person.addNumber(number, phoneType.toString());
+                    if (person.phone == null) {
+                        person.phone = number;
+                        person.phoneLabel=String.valueOf(type);
+                        person.icon=image;
+                    }
+                    phone.moveToNext();
+                }
+            }
+
+            phone.close();
+        }
+    }
+
+    public void matchContactEmails(Map<String, Person> contactsMap) {
+        // Get email
+        final String[] emailProjection = new String[]{
+                Email.DATA,
+                Email.TYPE,
+                Email.LABEL,
+                Email.CONTACT_ID,
+        };
+
+        Cursor email = new CursorLoader(context,
+                ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                emailProjection,
+                null,
+                null,
+                null).loadInBackground();
+
+        if (email.moveToFirst()) {
+            final int contactEmailColumnIndex = email.getColumnIndex(Email.DATA);
+            final int contactTypeColumnIndex = email.getColumnIndex(Email.TYPE);
+            final int contactIdColumnsIndex = email.getColumnIndex(Email.CONTACT_ID);
+            final int contactEmailLaeblIndex=email.getColumnIndex(Email.LABEL);
+
+            while (!email.isAfterLast()) {
+                final String address = email.getString(contactEmailColumnIndex);
+                final String contactId = email.getString(contactIdColumnsIndex);
+                final int type = email.getInt(contactTypeColumnIndex);
+                String customLabel = email.getString(contactEmailLaeblIndex);
+                Person person = contactsMap.get(contactId);
+                if (person == null) {
+                    continue;
+                }
+                if(person.email==null||person.email.equals("")) {
+                    CharSequence emailType = ContactsContract.CommonDataKinds.Email.getTypeLabel(context.getResources(), type, customLabel);
+                    person.email = address;
+                    person.emailLabel = String.valueOf(type);
+                }
+                //Person.addEmail(address, emailType.toString());
+                email.moveToNext();
+            }
+        }
+
+        email.close();
+    }
+
+    public void matchOrg(Map<String, Person> contactsMap, String id) {
+        String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
+
+        Cursor orgCur = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
+
+        if (orgCur != null) {
+            if (orgCur.moveToFirst()) {
+                String orgName = orgCur.getString(orgCur.getColumnIndex(Organization.COMPANY));
+                String title = orgCur.getString(orgCur.getColumnIndex(Organization.TITLE));
+                String department = orgCur.getString(orgCur.getColumnIndex(Organization.DEPARTMENT));
+                Person person = contactsMap.get(id);
+                person.company = orgName;
+                person.department = department;
+                person.title = title;
+                Log.w("org",title+" "+orgName+" "+department);
+            }
+            orgCur.close();
+        }
+
+    }
+
+    public void matchNote(Person person, String id) {
+
+        String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE};
+        Cursor noteCur = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
+        if (noteCur != null) {
+            if (noteCur.moveToFirst()) {
+                String note = noteCur.getString(noteCur.getColumnIndex(ContactsContract.CommonDataKinds.Note.NOTE));
+                person.extra = note;
+            }
+            noteCur.close();
+        }
+    }
+
+    public void matchAddress(Person person, String id) {
+        String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE};
+
+        Cursor addrCur = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
+        if (addrCur != null) {
+            if (addrCur.moveToFirst()) {
+                String poBox = addrCur.getString(addrCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.POBOX));
+                String street = addrCur.getString(addrCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.STREET));
+                String city = addrCur.getString(addrCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.CITY));
+                String state = addrCur.getString(addrCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.REGION));
+                String postalCode = addrCur.getString(addrCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE));
+                String country = addrCur.getString(addrCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.COUNTRY));
+                String type = addrCur.getString(addrCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.TYPE));
+                person.address = street;
+
+            }
+            addrCur.close();
+        }
+    }
+    public void matchWebsite(Person person,String id) {
+        String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE};
+
+        Cursor webCur = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
+        if (webCur != null) {
+            if (webCur.moveToFirst()) {
+                String website = webCur.getString(webCur.getColumnIndex(ContactsContract.CommonDataKinds.Website.URL));
+                person.url = website;
+            }
+
+            webCur.close();
+        }
+
+    }
+
+}

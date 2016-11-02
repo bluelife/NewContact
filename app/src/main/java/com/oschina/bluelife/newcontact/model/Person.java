@@ -8,17 +8,23 @@ import com.oschina.bluelife.newcontact.Utils.Format;
  */
 
 public class Person {
+    public String id;
+    public String rowId;
     public String name;
     public String email;
+    public String emailLabel;
     public String icon;
     public String phone;
+    public String phoneLabel;
     public String company;
     public String department;
     public String address;
     public String extra;
     public String place;
+    public String title;
     public int connectCount;
     public String spell;
+    public String url;
     public Person(){
 
     }
@@ -33,5 +39,10 @@ public class Person {
         String word=spell.substring(0,1).toUpperCase();
         return Format.isAlphabet(word)?word: Const.CRAP;
 
+    }
+    @Override
+    public String toString(){
+        return name+","+phone+","+email+","+company+","+department+","+title+" note:"+extra+" address:"+address+" url:"+url
+                +" icon:"+icon;
     }
 }

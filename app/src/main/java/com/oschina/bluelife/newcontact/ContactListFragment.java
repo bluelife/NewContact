@@ -1,8 +1,15 @@
 package com.oschina.bluelife.newcontact;
 
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
@@ -22,6 +29,7 @@ import android.view.ViewGroup;
 
 import com.oschina.bluelife.newcontact.Utils.Const;
 
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.event.UpdateFastScrollEvent;
 import com.oschina.bluelife.newcontact.model.ContactSource;
 import com.oschina.bluelife.newcontact.model.ContactViewModel;
@@ -30,6 +38,7 @@ import com.oschina.bluelife.newcontact.model.Person;
 import com.oschina.bluelife.newcontact.model.PersonCompare;
 import com.oschina.bluelife.newcontact.model.PersonViewModel;
 import com.oschina.bluelife.newcontact.model.SectionViewModel;
+import com.oschina.bluelife.newcontact.widget.ContactFetcher;
 import com.oschina.bluelife.newcontact.widget.ContactListAdapter;
 import com.oschina.bluelife.newcontact.widget.RecyclerViewFastScroller;
 import com.oschina.bluelife.newcontact.widget.model.AlphabetItem;
@@ -59,6 +68,8 @@ public class ContactListFragment extends Fragment implements
     private List<ContactViewModel> contactViewModels;
     ActionMode actionMode;
     private ContactListAdapter contactListAdapter;
+    private List<Person> contacts;
+    private static final int CONTACTS_LOADER_ID = 1;
     GestureDetectorCompat gestureDetector;
     @Nullable
     @Override
@@ -69,6 +80,8 @@ public class ContactListFragment extends Fragment implements
         Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.contact_list_title));
         toolbar.setSubtitle("123445556@cctv.com");
+        contacts=new ContactFetcher(getContext()).fetchAll();
+        ContactSource.getInstance().init(contacts,getString(R.string.contact_list_most_connect));
         return view;
     }
 
@@ -94,73 +107,6 @@ public class ContactListFragment extends Fragment implements
         fastScroller.setUpAlphabet(contactSource.getAlphabetItems());
         contactListAdapter.setItemListener(this);
 
-    }
-
-    private List<ContactViewModel> addPersonAndSections(){
-        String[] names=getActivity().getResources().getStringArray(R.array.list_persons);
-        List<Person> staredPersons=new ArrayList<>();
-        staredPersons.add(new Person("平安财富宝","aa@aa.com",""));
-        staredPersons.add(new Person("平安随行","aa@aa.com",""));
-        staredPersons.add(new Person("随行红包","aa@aa.com",""));
-        staredPersons.add(new Person("支付宝","aa@aa.com",""));
-        staredPersons.add(new Person("fb","fb@aa.com",""));
-        MostConnectViewModel mostConnectViewModel=new MostConnectViewModel(staredPersons);
-        contactViewModels=new ArrayList<>();
-        contactViewModels.add(mostConnectViewModel);
-        List<PersonViewModel> persons=getPersons(names);
-        List<ContactViewModel> sortViewModels=new ArrayList<>();
-        contactViewModels.addAll(persons);
-
-        List<String> alphabets=new ArrayList<>();
-        alphabetItems=new ArrayList<>();
-        for (int i = 0; i < contactViewModels.size(); i++) {
-            ContactViewModel contactViewModel=contactViewModels.get(i);
-            String code=contactViewModel.getSortCode();
-            String word= code;
-            SectionViewModel sectionViewModel=null;
-            if(!alphabets.contains(word)){
-                String label=code==Const.STAR?getString(R.string.contact_list_most_connect):code;
-                sectionViewModel=new SectionViewModel(label,code);
-                for (int j = i; j < contactViewModels.size(); j++) {
-                    if(contactViewModels.get(j).getSortCode().equalsIgnoreCase(code)){
-                        sectionViewModel.plus();
-                    }
-                    else{
-
-                        break;
-                    }
-                }
-
-                sortViewModels.add(sectionViewModel);
-                alphabets.add(word);
-            }
-            sortViewModels.add(contactViewModels.get(i));
-        }
-        //add alphabets
-        alphabets.clear();
-        for (int i = 0; i < sortViewModels.size(); i++) {
-            String word=sortViewModels.get(i).getSortCode();
-            if(!alphabets.contains(word)){
-                alphabets.add(word);
-                alphabetItems.add(new AlphabetItem(i,word,false));
-            }
-        }
-        return sortViewModels;
-    }
-
-    private List<PersonViewModel> getPersons(String[] names){
-        List<PersonViewModel> personModels=new ArrayList<>();
-        List<Person> persons=new ArrayList<>();
-        for (int i = 0; i < names.length; i++) {
-            Person person=new Person(names[i],"example@domain.com","");
-            persons.add(person);
-        }
-        Collections.sort(persons,new PersonCompare());
-        for (int i = 0; i < persons.size(); i++) {
-            PersonViewModel viewModel=new PersonViewModel(persons.get(i));
-            personModels.add(viewModel);
-        }
-        return personModels;
     }
 
     @Override
@@ -203,6 +149,9 @@ public class ContactListFragment extends Fragment implements
                 int currPos;
                 for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
                     currPos = selectedItemPositions.get(i);
+                    Person person=ContactSource.getInstance().getPerson(currPos);
+                    int id= Integer.parseInt(person.id);
+                    ContactManager.delete(getActivity().getContentResolver(),id);
                     ContactSource.getInstance().removeContact(currPos);
                     //contactListAdapter.removeData(currPos);
                 }
@@ -219,6 +168,7 @@ public class ContactListFragment extends Fragment implements
         actionMode=null;
         contactListAdapter.clearSelections();
     }
+
 
 
     @Override

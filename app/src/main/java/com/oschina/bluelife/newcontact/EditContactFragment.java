@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.Utils.Format;
 
 import com.oschina.bluelife.newcontact.model.ContactSource;
@@ -58,6 +59,7 @@ public class EditContactFragment extends Fragment {
     public static final String KEY_EXIST="exist";
     public static final String KEY_INDEX ="index";
     private int index;
+    private int contactId;
     private boolean isExistItem;
     @Nullable
     @Override
@@ -90,10 +92,11 @@ public class EditContactFragment extends Fragment {
                 name.setText(person.name);
                 phone.setText(person.phone);
                 company.setText(person.company);
-                place.setText(person.place);
+                place.setText(person.title);
                 address.setText(person.address);
                 extra.setText(person.extra);
                 department.setText(person.department);
+                contactId= Integer.parseInt(person.id);
             }
             else{
                 delBtn.setVisibility(View.GONE);
@@ -124,12 +127,16 @@ public class EditContactFragment extends Fragment {
                     phone.setError("phone invalid.");
                     isValid=false;
                 }
+                if(isValid){
+                    saveEdit();
+                }
             }
         });
     }
 
     @OnClick(R.id.edit_contact_del_btn)
     void onDelete(){
+        ContactManager.delete(getActivity().getContentResolver(),contactId);
         ContactSource.getInstance().removeContact(index);
         getActivity().getSupportFragmentManager().popBackStack();
     }
@@ -141,9 +148,24 @@ public class EditContactFragment extends Fragment {
                     getActivity().onBackPressed();
                 }
                 break;
+
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void saveEdit() {
+        Person person= ContactSource.getInstance().getPerson(index);
+        person.email=email.getText().toString();
+        person.phone=phone.getText().toString();
+        person.name=name.getText().toString();
+        person.company=company.getText().toString();
+        person.department=department.getText().toString();
+        person.title=place.getText().toString();
+        person.address=address.getText().toString();
+        person.extra=extra.getText().toString();
+        ContactManager.update(getActivity().getContentResolver(),person,getContext());
+        getActivity().onBackPressed();
     }
 }

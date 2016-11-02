@@ -9,10 +9,11 @@
     android:layout_marginBottom="10dp"
     android:background="@drawable/contact_list_item_bg">
     <ImageView
+        android:id="@+id/contact_list_item_avatar"
         app:srcCompat="@drawable/avatar"
         android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="30dp"
+        android:layout_height="30dp" />
     <LinearLayout
         android:layout_marginLeft="10dp"
         android:orientation="vertical"

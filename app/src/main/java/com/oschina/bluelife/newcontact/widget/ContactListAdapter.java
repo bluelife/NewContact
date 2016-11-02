@@ -1,6 +1,7 @@
 package com.oschina.bluelife.newcontact.widget;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,7 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.oschina.bluelife.newcontact.R;
@@ -155,6 +157,8 @@ public class ContactListAdapter extends RecyclerView.Adapter<BaseViewHolder> imp
 
     class NormalViewHolder extends BaseViewHolder<PersonViewModel>{
 
+        @BindView(R.id.contact_list_item_avatar)
+        ImageView avatar;
         @BindView(R.id.contact_list_item_email)
         TextView email;
         @BindView(R.id.contact_list_item_name)
@@ -170,6 +174,10 @@ public class ContactListAdapter extends RecyclerView.Adapter<BaseViewHolder> imp
 
             ViewCompat.setActivated(rootView,selectedItems.get(pos,false));
 
+            if(null!=model.getPerson().icon) {
+                avatar.setImageURI(Uri.parse(model.getPerson().icon));
+                Log.w("tttttttt", model.getPerson().icon);
+            }
             email.setText(model.getPerson().email);
             name.setText(model.getPerson().name);
             rootView.setOnClickListener(new View.OnClickListener() {

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.oschina.bluelife.newcontact.R;
 import com.oschina.bluelife.newcontact.Utils.Const;
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.event.UpdateFastScrollEvent;
 import com.oschina.bluelife.newcontact.widget.model.AlphabetItem;
 
@@ -35,12 +36,12 @@ public class ContactSource {
         return contactSource;
     }
     //just call once;
-    public void init(String[] names,String aLabel){
+    public void init(List<Person> persons,String aLabel){
         initMoseConnect();
         mostLabel=aLabel;
         alphabetItems=new ArrayList<>();
         contactViewModels=new ArrayList<>();
-        setPersons(names);
+        setPersons(persons);
         updateContacts();
 
     }
@@ -112,7 +113,9 @@ public class ContactSource {
                 }
             }
         }
+
         contactViewModels.remove(model);
+
     }
     private void removeAlphabet(String word){
         for (int i = 0; i < alphabetItems.size(); i++) {
@@ -129,12 +132,8 @@ public class ContactSource {
         return contactViewModels;
     }
 
-    private void setPersons(String[] names){
-        persons=new ArrayList<>();
-        for (int i = 0; i < names.length; i++) {
-            Person person=new Person(names[i],"example@domain.com","");
-            persons.add(person);
-        }
+    private void setPersons(List<Person> personList){
+        persons=personList;
     }
     private List<PersonViewModel> getSortedPersons(){
         List<PersonViewModel> personModels=new ArrayList<>();

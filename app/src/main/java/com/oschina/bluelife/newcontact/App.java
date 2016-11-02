@@ -14,6 +14,6 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         String[] names=getResources().getStringArray(R.array.list_persons);
-        ContactSource.getInstance().init(names,getString(R.string.contact_list_most_connect));
+
     }
 }
