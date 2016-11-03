@@ -16,6 +16,8 @@ public class Person {
     public String icon;
     public String phone;
     public String phoneLabel;
+    public String homePhone;
+
     public String company;
     public String department;
     public String address;

@@ -1,8 +1,10 @@
 package com.oschina.bluelife.newcontact;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
@@ -17,7 +19,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.oschina.bluelife.newcontact.Utils.ContactManager;
+import com.oschina.bluelife.newcontact.Utils.UIHelper;
+import com.oschina.bluelife.newcontact.model.Person;
+import com.oschina.bluelife.newcontact.widget.ContactFetcher;
+import com.oschina.bluelife.newcontact.widget.transform.RoundedCornersTransformation;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import butterknife.BindView;
@@ -34,11 +41,13 @@ public class AddExistContactFragment extends Fragment {
     @BindView(R.id.contact_exist_email)
     TextView email;
     @BindView(R.id.contact_exist_name)
-    TextView name;
+    TextView nameText;
     @BindView(R.id.contact_view_avatar)
     ImageView avatar;
     private static final int REQUEST_PICK_FROM_FILE = 2;
     private static final int REQUEST_CROP_INTENT = 3;
+    private Person person;
+    private String name="a1";
 
     @Nullable
     @Override
@@ -54,8 +63,17 @@ public class AddExistContactFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        boolean hasContact= ContactManager.contactExists(getActivity().getContentResolver(),"a1");
-        Log.w("has",hasContact+"");
+        ContactFetcher fetcher=new ContactFetcher(getContext());
+
+        boolean hasContact= ContactManager.contactExists(getActivity().getContentResolver(),name);
+        if(hasContact){
+            person=fetcher.fetchSingle(name);
+            nameText.setText(person.name);
+            email.setText(person.email);
+            //if(person.icon!=null) {
+            setIcon();
+            //}
+        }
     }
 
     @OnClick(R.id.contact_view_avatar)
@@ -70,24 +88,39 @@ public class AddExistContactFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) return;
+        int maxSize= UIHelper.getMaxContactPhotoSize(getContext());
         if(requestCode==REQUEST_PICK_FROM_FILE){
             CropImage.activity(data.getData())
                     .setAspectRatio(1,1)
-                    .setMaxCropResultSize(400,400)
-                    .setMinCropResultSize(400,400)
+                    .setMaxCropResultSize(maxSize,maxSize)
+                    .setMinCropResultSize(96,96)
                     .start(getContext(), this);
         }
         else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
-                Uri resultUri = result.getUri();
-                avatar.setImageURI(resultUri);
+                ContactManager.updatePhoto(getActivity().getContentResolver(),result.getUri().getPath(),person.rowId);
+                //Uri resultUri = result.getUri();
+                setIcon();
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
             }
         }
     }
 
+    private void setIcon(){
+        //Bitmap bitmap =  MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), Uri.parse(path));
+        byte[] bytes=ContactManager.openPhoto(getActivity().getContentResolver(),Long.parseLong(person.rowId));
+        Glide.with(this).load(bytes)
+                .bitmapTransform(new RoundedCornersTransformation(getContext(),15,2))
+                .placeholder(R.drawable.contacts_contactslist_head).into(avatar);
+    }
+
+    private void setIcon(Uri imageUri){
+        Glide.with(this).load(imageUri).bitmapTransform(new RoundedCornersTransformation(getContext(),15,2))
+                .placeholder(R.drawable.contacts_contactslist_head)
+                .into(avatar);
+    }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -101,6 +134,7 @@ public class AddExistContactFragment extends Fragment {
                 MainActivity mainActivity=(MainActivity)getActivity();
                 Bundle bundle=new Bundle();
                 bundle.putBoolean(EditContactFragment.KEY_EXIST,false);
+                bundle.putString(EditContactFragment.KEY_NAME,name);
                 Fragment fragment=new EditContactFragment();
                 fragment.setArguments(bundle);
                 mainActivity.openFragment(fragment);

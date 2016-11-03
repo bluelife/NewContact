@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.oschina.bluelife.newcontact.R;
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.model.ContactViewModel;
 import com.oschina.bluelife.newcontact.model.MostConnectViewModel;
 import com.oschina.bluelife.newcontact.model.PersonViewModel;
@@ -175,13 +176,13 @@ public class ContactListAdapter extends RecyclerView.Adapter<BaseViewHolder> imp
             final int pos=getModelPosition(model);
 
             ViewCompat.setActivated(rootView,selectedItems.get(pos,false));
-
-            if(null!=model.getPerson().icon) {
-                Glide.with(context).load(model.getPerson().icon)
-                        .bitmapTransform(new RoundedCornersTransformation(context,10,2)).into(avatar);
+            byte[] bytes= ContactManager.openPhoto(context.getContentResolver(),Long.parseLong(model.getPerson().rowId));
+            Glide.with(context).load(bytes)
+                        .bitmapTransform(new RoundedCornersTransformation(context,10,2)).
+                    placeholder(R.drawable.avatar).into(avatar);
                 //avatar.setImageURI(Uri.parse(model.getPerson().icon));
-                Log.w("tttttttt", model.getPerson().icon);
-            }
+
+
             email.setText(model.getPerson().email);
             name.setText(model.getPerson().name);
             rootView.setOnClickListener(new View.OnClickListener() {

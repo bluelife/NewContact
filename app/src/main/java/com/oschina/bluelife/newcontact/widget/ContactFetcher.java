@@ -1,8 +1,10 @@
 package com.oschina.bluelife.newcontact.widget;
 
+import android.content.ContentUris;
 import android.content.Context;
 
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -16,24 +18,25 @@ import com.oschina.bluelife.newcontact.model.Person;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+import android.provider.ContactsContract.Data;
 /**
  * Created by slomka.jin on 2016/11/1.
  */
 
 public class ContactFetcher {
     private final Context context;
+    private String[] projectionFields = new String[]{
+            ContactsContract.Contacts._ID,
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.Contacts.TIMES_CONTACTED
+    };
 
     public ContactFetcher(Context c) {
         this.context = c;
     }
 
     public ArrayList<Person> fetchAll() {
-        String[] projectionFields = new String[]{
-                ContactsContract.Contacts._ID,
-                ContactsContract.Contacts.DISPLAY_NAME,
-                ContactsContract.Contacts.TIMES_CONTACTED
-        };
+
         ArrayList<Person> listContacts = new ArrayList<>();
         CursorLoader cursorLoader = new CursorLoader(context,
                 ContactsContract.Contacts.CONTENT_URI,
@@ -58,25 +61,50 @@ public class ContactFetcher {
                 String contactDisplayName = c.getString(nameIndex);
                 Person person = new Person(contactDisplayName,"","");
                 person.id = contactId;
-                person.rowId=getRawContactId(contactId);
+                loadPersonData(person,contactId);
                 contactsMap.put(contactId, person);
                 listContacts.add(person);
-                matchOrg(contactsMap, contactId);
-                matchNote(person, contactId);
-                matchAddress(person,contactId);
-                matchWebsite(person,contactId);
+
             } while (c.moveToNext());
         }
 
         c.close();
-
-        matchContactNumbers(contactsMap);
-        matchContactEmails(contactsMap);
-        for (int i = 0; i < listContacts.size(); i++) {
-            Person person = listContacts.get(i);
-            Log.w("contact", person.toString());
-        }
         return listContacts;
+    }
+    private void loadPersonData(Person person,String contactId){
+        person.rowId=getRawContactId(contactId);
+        matchContactNumbers(person,contactId);
+        matchOrg(person, contactId);
+        matchNote(person, contactId);
+        matchAddress(person,contactId);
+        matchWebsite(person,contactId);
+        matchContactEmails(person,contactId);
+    }
+    public Person fetchSingle(String name){
+        String where = Data.DISPLAY_NAME + " = ? ";
+        String[] whereParameters = new String[]{name};
+        CursorLoader cursorLoader = new CursorLoader(context,
+                ContactsContract.Contacts.CONTENT_URI,
+                projectionFields, // the columns to retrieve
+                where, // the selection criteria (none)
+                whereParameters, // the selection args (none)
+                "upper(" + Phone.DISPLAY_NAME + ") ASC" // the sort order (default)
+        );
+
+        Person person=null;
+        Cursor c = cursorLoader.loadInBackground();
+        if(c!=null){
+            if(c.moveToFirst()){
+                int idIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
+                String contactId = c.getString(idIndex);
+                person = new Person(name,"","");
+                person.id = contactId;
+                loadPersonData(person,contactId);
+
+            }
+            c.close();
+        }
+        return person;
     }
     public String getRawContactId(String contactId)
     {
@@ -92,7 +120,7 @@ public class ContactFetcher {
         c.close();
         return "-1";
     }
-    public void matchContactNumbers(Map<String, Person> contactsMap) {
+    public void matchContactNumbers(Person person,String id) {
         // Get numbers
         final String[] numberProjection = new String[]{
                 Phone.NUMBER,
@@ -101,48 +129,49 @@ public class ContactFetcher {
                 Phone.CONTACT_ID,
                 Phone.PHOTO_URI
         };
-
-        Cursor phone = new CursorLoader(context,
-                Phone.CONTENT_URI,
-                numberProjection,
-                null,
-                null,
-                null).loadInBackground();
+        String where = Data.CONTACT_ID + " = ? AND " + Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,Phone.CONTENT_ITEM_TYPE};
+        Cursor phone = context.getContentResolver().query(Data.CONTENT_URI, numberProjection, where, whereParameters, null);
 
         if (phone != null) {
+            final int contactNumberColumnIndex = phone.getColumnIndex(Phone.NUMBER);
+            final int contactTypeColumnIndex = phone.getColumnIndex(Phone.TYPE);
+            final int contactIdColumnIndex = phone.getColumnIndex(Phone.CONTACT_ID);
+            final int contactPhotoIndex=phone.getColumnIndex(Phone.PHOTO_URI);
+            final int contactPhoneLabel=phone.getColumnIndex(Phone.LABEL);
+            //Uri photo = ContentUris.withAppendedId( ContactsContract.Contacts.CONTENT_URI, Integer.valueOf(id));
+            //photo = Uri.withAppendedPath( photo, ContactsContract.Contacts.Photo.PHOTO_URI );
             if (phone.moveToFirst()) {
-                final int contactNumberColumnIndex = phone.getColumnIndex(Phone.NUMBER);
-                final int contactTypeColumnIndex = phone.getColumnIndex(Phone.TYPE);
-                final int contactIdColumnIndex = phone.getColumnIndex(Phone.CONTACT_ID);
-                final int contactPhotoIndex=phone.getColumnIndex(Phone.PHOTO_URI);
-                final int contactPhoneLabel=phone.getColumnIndex(Phone.LABEL);
 
-                while (!phone.isAfterLast()) {
-                    final String number = phone.getString(contactNumberColumnIndex);
-                    final String contactId = phone.getString(contactIdColumnIndex);
-                    final String image=phone.getString(contactPhotoIndex);
-                    Person person = contactsMap.get(contactId);
-                    if (person == null) {
-                        continue;
-                    }
-                    final int type = phone.getInt(contactTypeColumnIndex);
-                    String customLabel =  phone.getString(contactPhoneLabel);
-                    CharSequence phoneType = Phone.getTypeLabel(context.getResources(), type,customLabel);
-                    //Person.addNumber(number, phoneType.toString());
-                    if (person.phone == null) {
-                        person.phone = number;
-                        person.phoneLabel=String.valueOf(type);
-                        person.icon=image;
-                    }
-                    phone.moveToNext();
+                final String number = phone.getString(contactNumberColumnIndex);
+                final String contactId = phone.getString(contactIdColumnIndex);
+                final String image=phone.getString(contactPhotoIndex);
+                final int type = phone.getInt(contactTypeColumnIndex);
+                if (person.phone == null) {
+                    person.phone = number;
+                    person.phoneLabel=String.valueOf(type);
+                    person.icon=image;
                 }
-            }
 
+            }
             phone.close();
         }
+
     }
 
-    public void matchContactEmails(Map<String, Person> contactsMap) {
+    public void matchPhoto(Person person,String id){
+        String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE};
+        Cursor cursor = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
+        if(cursor.moveToFirst()){
+
+            //String path=cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_FILE_ID))
+        }
+
+    }
+
+    public void matchContactEmails(Person person,String id) {
         // Get email
         final String[] emailProjection = new String[]{
                 Email.DATA,
@@ -150,8 +179,24 @@ public class ContactFetcher {
                 Email.LABEL,
                 Email.CONTACT_ID,
         };
+        String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE};
+        Cursor email = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, emailProjection, where, whereParameters, null);
 
-        Cursor email = new CursorLoader(context,
+        if (email != null) {
+            if (email.moveToFirst()) {
+                final int contactEmailColumnIndex = email.getColumnIndex(Email.DATA);
+                final int contactTypeColumnIndex = email.getColumnIndex(Email.TYPE);
+                final String address = email.getString(contactEmailColumnIndex);
+                final int type = email.getInt(contactTypeColumnIndex);
+                person.email = address;
+                person.emailLabel = String.valueOf(type);
+
+            }
+            email.close();
+        }
+        /*Cursor email = new CursorLoader(context,
                 ContactsContract.CommonDataKinds.Email.CONTENT_URI,
                 emailProjection,
                 null,
@@ -183,10 +228,10 @@ public class ContactFetcher {
             }
         }
 
-        email.close();
+        email.close();*/
     }
 
-    public void matchOrg(Map<String, Person> contactsMap, String id) {
+    public void matchOrg(Person person, String id) {
         String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
         String[] whereParameters = new String[]{id,
                 ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
@@ -198,11 +243,9 @@ public class ContactFetcher {
                 String orgName = orgCur.getString(orgCur.getColumnIndex(Organization.COMPANY));
                 String title = orgCur.getString(orgCur.getColumnIndex(Organization.TITLE));
                 String department = orgCur.getString(orgCur.getColumnIndex(Organization.DEPARTMENT));
-                Person person = contactsMap.get(id);
                 person.company = orgName;
                 person.department = department;
                 person.title = title;
-                Log.w("org",title+" "+orgName+" "+department);
             }
             orgCur.close();
         }

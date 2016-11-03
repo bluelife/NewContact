@@ -8,6 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
+import com.oschina.bluelife.newcontact.model.Person;
+import com.oschina.bluelife.newcontact.widget.ContactFetcher;
+
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -49,12 +53,19 @@ public class EditTestFragment extends Fragment {
 
     @OnClick(R.id.create_qrcode)
     void openCreatedQRCode(){
-        Bundle bundle=new Bundle();
-        bundle.putInt(BusinessCardFragment.KEY_INDEX,0);
-        bundle.putInt(BusinessCardFragment.KEY_ICON,R.drawable.twitter_small);
-        Fragment fragment=new BusinessCardFragment();
-        fragment.setArguments(bundle);
-        mainActivity.openFragment(fragment);
+        String name="aas";
+
+        boolean hasContact= ContactManager.contactExists(getActivity().getContentResolver(),name);
+        if(hasContact){
+
+            Bundle bundle=new Bundle();
+            bundle.putString(BusinessCardFragment.KEY_INDEX,name);
+
+            Fragment fragment=new BusinessCardFragment();
+            fragment.setArguments(bundle);
+            mainActivity.openFragment(fragment);
+        }
+
     }
     @OnClick(R.id.open_qrcode)
     void openQRCode(){

@@ -3,14 +3,20 @@ package com.oschina.bluelife.newcontact.Utils;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
@@ -18,6 +24,12 @@ import android.provider.ContactsContract.Data;
 
 import com.oschina.bluelife.newcontact.model.Person;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 /**
@@ -179,6 +191,15 @@ public class ContactManager {
                     .build());
         }
 
+        if(hasValue(person.homePhone)){
+            ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                    .withValueBackReference(Data.RAW_CONTACT_ID, 0)
+                    .withValue(ContactsContract.Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+                    .withValue(Phone.NUMBER, person.homePhone)
+                    .withValue(Phone.TYPE, Phone.TYPE_HOME)
+                    .build());
+        }
+
 
         //------------------------------------------------------ Email
         if (hasValue(person.email)) {
@@ -202,6 +223,14 @@ public class ContactManager {
                     .withValueBackReference(Data.RAW_CONTACT_ID, 0)
                     .withValue(Data.MIMETYPE, StructuredPostal.CONTENT_ITEM_TYPE)
                     .withValue(StructuredPostal.STREET,person.address)
+                    .build());
+        }
+        //------------------------------------------------------website
+        if(hasValue(person.url)){
+            ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                    .withValueBackReference(Data.RAW_CONTACT_ID, 0)
+                    .withValue(Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Website.URL,person.url)
                     .build());
         }
         //------------------------------------------------------ Organization
@@ -230,7 +259,7 @@ public class ContactManager {
         return isDone;
     }
     public static boolean contactExists(ContentResolver contentResolver, String name) {
-        Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(name));
+        /*Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(name));
         String[] mPhoneNumberProjection = { ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.NUMBER, ContactsContract.PhoneLookup.DISPLAY_NAME };
         Cursor cur = contentResolver.query(lookupUri, mPhoneNumberProjection, null, null, null);
         try {
@@ -241,7 +270,19 @@ public class ContactManager {
             if (cur != null)
                 cur.close();
         }
-        return false;
+        return false;*/
+        String where = Data.DISPLAY_NAME + " = ? ";
+        String[] whereParameters = new String[]{name};
+        Cursor cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
+        boolean exist=false;
+        if(cursor!=null){
+            if(cursor.moveToFirst())
+                exist=true;
+            cursor.close();
+        }
+        else
+            exist=false;
+        return exist;
     }
     public static boolean checkEmailExist(Context context,String id){
         final String[] emailProjection = new String[]{
@@ -290,5 +331,64 @@ public class ContactManager {
         boolean exist=noteCur.getCount()>0;
         noteCur.close();
         return exist;
+    }
+    public static void updatePhoto(ContentResolver contentResolver, String bitmapPath,String id){
+        ContentValues values = new ContentValues();
+        int photoRow = -1;
+        String where = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] params=new String[]{id,Photo.CONTENT_ITEM_TYPE};
+        Cursor cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI, null, where, params, null);
+        int idIdx = cursor.getColumnIndexOrThrow(Photo.PHOTO_ID);
+        if (cursor.moveToFirst()) {
+            photoRow = cursor.getInt(idIdx);
+        }
+        File image = new File(bitmapPath);
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        Bitmap bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(),bmOptions);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG , 100, stream);
+        cursor.close();
+
+        int size = bitmap.getRowBytes() * bitmap.getHeight();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+        bitmap.copyPixelsToBuffer(byteBuffer);
+        byte[] byteArray = stream.toByteArray();
+
+        values.put(Data.RAW_CONTACT_ID, id);
+        values.put(Data.IS_SUPER_PRIMARY, 1);
+        values.put(Photo.PHOTO, byteArray);
+        values.put(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
+
+        Log.w("photo",photoRow+" "+id+"<");
+        if (photoRow >= 0) {
+
+            int count=contentResolver.update(ContactsContract.Data.CONTENT_URI, values, Data._ID + " = " + photoRow,null);
+            Log.w("int,",count+"");
+        } else {
+            contentResolver.insert(ContactsContract.Data.CONTENT_URI, values);
+        }
+        bitmap.recycle();
+
+    }
+    public static byte[] openPhoto(ContentResolver contentResolver, long contactId) {
+        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+        Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+        Cursor cursor = contentResolver.query(photoUri,
+                new String[] {Photo.PHOTO}, null, null, null);
+        if (cursor == null) {
+            return null;
+        }
+        try {
+            if (cursor.moveToFirst()) {
+                byte[] data = cursor.getBlob(0);
+                if (data != null) {
+                    return data;
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
+
     }
 }

@@ -1,6 +1,12 @@
 package com.oschina.bluelife.newcontact.Utils;
 
 
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -34,5 +40,22 @@ public class UIHelper {
             }
         }
         return null;
+    }
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public static int getMaxContactPhotoSize(final Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            // Note that this URI is safe to call on the UI thread.
+            final Uri uri = ContactsContract.DisplayPhoto.CONTENT_MAX_DIMENSIONS_URI;
+            final String[] projection = new String[] { ContactsContract.DisplayPhoto.DISPLAY_MAX_DIM };
+            final Cursor c = context.getContentResolver().query(uri, projection, null, null, null);
+            try {
+                c.moveToFirst();
+                return c.getInt(0);
+            } finally {
+                c.close();
+            }
+        }
+        // fallback: 96x96 is the max contact photo size for pre-ICS versions
+        return 96;
     }
 }

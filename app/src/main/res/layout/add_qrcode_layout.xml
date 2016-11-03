@@ -64,7 +64,7 @@
             android:maxLines="1"
             android:background="@drawable/apptheme_edit_text_holo_light"
             android:layout_width="0dp"
-            android:text="3355802@qq.com"
+
             android:layout_height="wrap_content" />
     </LinearLayout>
 

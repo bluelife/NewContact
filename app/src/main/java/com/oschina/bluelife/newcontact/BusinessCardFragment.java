@@ -17,8 +17,12 @@ import android.widget.TextView;
 
 import com.google.zxing.WriterException;
 import com.oschina.bluelife.newcontact.Utils.Const;
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.model.BusinessCardSource;
+import com.oschina.bluelife.newcontact.model.ContactSource;
+import com.oschina.bluelife.newcontact.model.Person;
 import com.oschina.bluelife.newcontact.model.Vcard;
+import com.oschina.bluelife.newcontact.widget.ContactFetcher;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,9 +52,10 @@ public class BusinessCardFragment extends Fragment {
     @BindView(R.id.qrcode_person_address)
     TextView address;
     public static String KEY_INDEX="index";
-    public static String KEY_ICON="icon";
-    int index;
+    //public static String KEY_ICON="icon";
+    String index;
     String resId;
+    private Person person;
 
     @Nullable
     @Override
@@ -62,8 +67,8 @@ public class BusinessCardFragment extends Fragment {
         toolbar.setTitle(getString(R.string.business_card_title));
         Bundle bundle=getArguments();
         if(null!=bundle) {
-            index = bundle.getInt(KEY_INDEX);
-            resId = bundle.getString(KEY_ICON);
+            index = bundle.getString(KEY_INDEX);
+            //resId = bundle.getString(KEY_ICON);
         }
         return view;
     }
@@ -82,14 +87,17 @@ public class BusinessCardFragment extends Fragment {
     }
     private Bitmap getIcon(){
         Bitmap bmp;
-        if(resId!=null){
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            Bitmap bitmap = BitmapFactory.decodeFile(resId,bmOptions);
+        byte[] bytes= ContactManager.openPhoto(getActivity().getContentResolver(),Long.parseLong(person.rowId));
+
+        if(bytes!=null){
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inMutable = true;
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
             bmp = Bitmap.createScaledBitmap(bitmap,Const.ICON_SIZE,Const.ICON_SIZE,true);
         }
         else{
             bmp = ((BitmapDrawable) ContextCompat.getDrawable(getActivity(),
-                    R.drawable.youtube_small)).getBitmap();
+                    R.drawable.contacts_contactslist_head)).getBitmap();
         }
         return bmp;
     }
@@ -98,6 +106,18 @@ public class BusinessCardFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         String info= Const.getQRContent();
 
+        ContactFetcher fetcher=new ContactFetcher(getContext());
+        person=fetcher.fetchSingle(index);
+
+        //Vcard vcard= BusinessCardSource.get().getCard(index);
+        name.setText(person.name);
+        place.setText(person.address);
+        company.setText(person.company);
+        mobilephone.setText(person.phone);
+        linephone.setText("");
+        email.setText(person.email);
+        website.setText(person.url);
+        address.setText(person.address);
         Bitmap bmp = getIcon();
         QRCodeEncoder qrCodeEncoder=new QRCodeEncoder(info,Const.ICON_SIZE,bmp);
         try {
@@ -106,14 +126,5 @@ public class BusinessCardFragment extends Fragment {
         } catch (WriterException e) {
             e.printStackTrace();
         }
-        Vcard vcard= BusinessCardSource.get().getCard(index);
-        name.setText(vcard.name);
-        place.setText(vcard.place);
-        company.setText(vcard.company);
-        mobilephone.setText(vcard.mobilePhone);
-        linephone.setText(vcard.linePhone);
-        email.setText(vcard.email);
-        website.setText(vcard.website);
-        address.setText(vcard.address);
     }
 }

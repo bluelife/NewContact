@@ -19,10 +19,15 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.Utils.FileUtils;
 import com.oschina.bluelife.newcontact.Utils.Format;
+import com.oschina.bluelife.newcontact.Utils.UIHelper;
 import com.oschina.bluelife.newcontact.model.BusinessCardSource;
+import com.oschina.bluelife.newcontact.model.Person;
 import com.oschina.bluelife.newcontact.model.Vcard;
+import com.oschina.bluelife.newcontact.widget.transform.RoundedCornersTransformation;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;
@@ -106,19 +111,19 @@ public class EditQRcodeFragment extends Fragment {
                     isValid=false;
                 }
                 if(isValid){
-                    Vcard vcard=new Vcard();
-                    vcard.website=website.getText().toString();
-                    vcard.place=place.getText().toString();
-                    vcard.name=name.getText().toString();
-                    vcard.mobilePhone=mobile.getText().toString();
-                    vcard.linePhone=line.getText().toString();
-                    vcard.address=address.getText().toString();
-                    vcard.company=company.getText().toString();
-                    vcard.email=email.getText().toString();
-                    BusinessCardSource.get().addCard(vcard);
+                    Person person=new Person(name.getText().toString(),"","");
+                    person.url=website.getText().toString();
+                    person.title=place.getText().toString();
+                    person.phone=mobile.getText().toString();
+                    person.homePhone=line.getText().toString();
+                    person.address=address.getText().toString();
+                    person.company=company.getText().toString();
+                    person.email=email.getText().toString();
+                    ContactManager.insert(getActivity().getContentResolver(),person);
+                    //BusinessCardSource.get().addCard(vcard);
                     Bundle bundle=new Bundle();
-                    bundle.putInt(BusinessCardFragment.KEY_INDEX,BusinessCardSource.get().getLastIndex());
-                    bundle.putString(BusinessCardFragment.KEY_ICON,imagePath);
+                    bundle.putString(BusinessCardFragment.KEY_INDEX,person.name);
+                    //bundle.putString(BusinessCardFragment.KEY_ICON,imagePath);
                     MainActivity mainActivity=(MainActivity)getActivity();
                     BusinessCardFragment fragment=new BusinessCardFragment();
                     fragment.setArguments(bundle);
@@ -140,10 +145,11 @@ public class EditQRcodeFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) return;
         if(requestCode==REQUEST_PICK_FROM_FILE){
+            int maxSize= UIHelper.getMaxContactPhotoSize(getContext());
             CropImage.activity(data.getData())
                     .setAspectRatio(1,1)
-                    .setMaxCropResultSize(400,400)
-                    .setMinCropResultSize(400,400)
+                    .setMaxCropResultSize(maxSize,maxSize)
+                    .setMinCropResultSize(96,96)
                     .start(getContext(), this);
         }
         else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -152,14 +158,20 @@ public class EditQRcodeFragment extends Fragment {
                 Uri resultUri = result.getUri();
                 String fileName=resultUri.getPath().substring(resultUri.getPath().lastIndexOf(File.separator));
                 imagePath=resultUri.getPath();
+
                 //imagePath= FileUtils.getImagePath(getActivity().getContentResolver(),resultUri);
                 Log.w("rrrr",imagePath+" "+resultUri.getPath());
                 //storeImage(result.getBitmap());
-                icon.setImageURI(resultUri);
+                setIcon(resultUri);
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
             }
         }
+    }
+    private void setIcon(Uri uri){
+        Glide.with(this).load(uri)
+                .bitmapTransform(new RoundedCornersTransformation(getContext(),15,2))
+                .placeholder(R.drawable.contacts_contactslist_head).into(icon);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
