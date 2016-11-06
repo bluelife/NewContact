@@ -56,6 +56,7 @@ public class ContactManager {
                 System.out.println(e.getStackTrace());
             }
         }
+        cur.close();
     }
     public static boolean update(ContentResolver cr, Person person,Context context){
         boolean success=false;
@@ -246,7 +247,24 @@ public class ContactManager {
                     .withValue(Organization.TYPE,Organization.TYPE_WORK)
                     .build());
 
+        if(hasValue(person.icon)){
+            File image = new File(person.icon);
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            Bitmap bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(),bmOptions);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG , 100, stream);
 
+
+            int size = bitmap.getRowBytes() * bitmap.getHeight();
+            ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+            bitmap.copyPixelsToBuffer(byteBuffer);
+            byte[] byteArray = stream.toByteArray();
+            ops.add(ContentProviderOperation
+                    .newInsert(Data.CONTENT_URI)
+                    .withValueBackReference(Data.RAW_CONTACT_ID, 0)
+                    .withValue(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE)
+                    .withValue(Photo.PHOTO,byteArray).build());
+        }
         boolean isDone=false;
         // Asking the Contact provider to create a new contact
         try {

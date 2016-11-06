@@ -23,6 +23,8 @@ import com.oschina.bluelife.newcontact.model.ContactSource;
 import com.oschina.bluelife.newcontact.model.Person;
 import com.oschina.bluelife.newcontact.model.Vcard;
 import com.oschina.bluelife.newcontact.widget.ContactFetcher;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -104,7 +106,7 @@ public class BusinessCardFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        String info= Const.getQRContent();
+
 
         ContactFetcher fetcher=new ContactFetcher(getContext());
         person=fetcher.fetchSingle(index);
@@ -114,10 +116,13 @@ public class BusinessCardFragment extends Fragment {
         place.setText(person.address);
         company.setText(person.company);
         mobilephone.setText(person.phone);
-        linephone.setText("");
+        linephone.setText(person.homePhone);
         email.setText(person.email);
         website.setText(person.url);
         address.setText(person.address);
+        Moshi moshi=new Moshi.Builder().build();
+        JsonAdapter<Person> jsonAdapter=moshi.adapter(Person.class);
+        String info= jsonAdapter.toJson(person);
         Bitmap bmp = getIcon();
         QRCodeEncoder qrCodeEncoder=new QRCodeEncoder(info,Const.ICON_SIZE,bmp);
         try {

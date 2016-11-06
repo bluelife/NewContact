@@ -25,9 +25,11 @@ public class ContactSource {
     private List<AlphabetItem> alphabetItems;
     private String mostLabel;
     private List<Person> persons;
+    private static final int MAX_STAR_NUM=5;
+    private List<Person> staredPersons;
 
     private ContactSource(){
-
+        staredPersons=new ArrayList<>();
     }
     public static ContactSource getInstance(){
         if(contactSource==null){
@@ -37,11 +39,12 @@ public class ContactSource {
     }
     //just call once;
     public void init(List<Person> persons,String aLabel){
-        initMoseConnect();
+
         mostLabel=aLabel;
         alphabetItems=new ArrayList<>();
         contactViewModels=new ArrayList<>();
         setPersons(persons);
+        initMostConnect();
         updateContacts();
 
     }
@@ -113,6 +116,31 @@ public class ContactSource {
                 }
             }
         }
+        //update relative most connect list.
+
+        Person removePerson=null;
+        for (int i = 0; i < persons.size(); i++) {
+            Person person=persons.get(i);
+            Person delPerson=((PersonViewModel) model).getPerson();
+            if(person.phone.equals(delPerson.phone)){
+                removePerson=person;
+                break;
+            }
+        }
+        boolean mostNeedUpdate=false;
+        if(removePerson!=null){
+            for (int i = 0; i < staredPersons.size(); i++) {
+                if(staredPersons.get(i).phone.equals(removePerson.phone)){
+                    mostNeedUpdate=true;
+                    break;
+                }
+            }
+            persons.remove(removePerson);
+            if(mostNeedUpdate){
+                Log.w("rrrrr","update most");
+                initMostConnect();
+            }
+        }
 
         contactViewModels.remove(model);
 
@@ -144,13 +172,20 @@ public class ContactSource {
         }
         return personModels;
     }
-    private void initMoseConnect(){
-        List<Person> staredPersons=new ArrayList<>();
-        staredPersons.add(new Person("平安财富宝","aa@aa.com",""));
+    private void initMostConnect(){
+        staredPersons.clear();
+        List<Person> personsCopy=new ArrayList<>();
+        personsCopy.addAll(persons);
+        int count=Math.min(MAX_STAR_NUM,personsCopy.size());
+        Collections.sort(personsCopy,new TimesCompare());
+        for (int i = 0; i < count; i++) {
+            staredPersons.add(personsCopy.get(i));
+        }
+        /*staredPersons.add(new Person("平安财富宝","aa@aa.com",""));
         staredPersons.add(new Person("平安随行","aa@aa.com",""));
         staredPersons.add(new Person("随行红包","aa@aa.com",""));
         staredPersons.add(new Person("支付宝","aa@aa.com",""));
-        staredPersons.add(new Person("fb","fb@aa.com",""));
+        staredPersons.add(new Person("fb","fb@aa.com",""));*/
         mostConnectViewModel=new MostConnectViewModel(staredPersons);
     }
 }

@@ -54,13 +54,15 @@ public class ContactFetcher {
 
             int idIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
             int nameIndex = c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-
+            int timesIndex=c.getColumnIndex(ContactsContract.Contacts.TIMES_CONTACTED);
             do {
                 String contactId = c.getString(idIndex);
-
+                int count=c.getInt(timesIndex);
                 String contactDisplayName = c.getString(nameIndex);
                 Person person = new Person(contactDisplayName,"","");
                 person.id = contactId;
+                person.connectCount=count;
+                Log.w("count",count+"d "+contactDisplayName);
                 loadPersonData(person,contactId);
                 contactsMap.put(contactId, person);
                 listContacts.add(person);
@@ -111,14 +113,15 @@ public class ContactFetcher {
         String[] projection=new String[]{ContactsContract.RawContacts._ID};
         String selection=ContactsContract.RawContacts.CONTACT_ID+"=?";
         String[] selectionArgs=new String[]{contactId};
+        String rowId="-1";
         Cursor c=context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI,projection,selection,selectionArgs , null);
         if(c.moveToFirst()) {
-            String rawContactId = c.getString(c.getColumnIndex(ContactsContract.RawContacts._ID));
-            Log.d("raww", "Contact Id: " + contactId + " Raw Contact Id: " + rawContactId);
-            return rawContactId;
+            rowId = c.getString(c.getColumnIndex(ContactsContract.RawContacts._ID));
+            //Log.d("raww", "Contact Id: " + contactId + " Raw Contact Id: " + rowId);
+
         }
         c.close();
-        return "-1";
+        return rowId;
     }
     public void matchContactNumbers(Person person,String id) {
         // Get numbers
@@ -143,14 +146,20 @@ public class ContactFetcher {
             //photo = Uri.withAppendedPath( photo, ContactsContract.Contacts.Photo.PHOTO_URI );
             if (phone.moveToFirst()) {
 
-                final String number = phone.getString(contactNumberColumnIndex);
-                final String contactId = phone.getString(contactIdColumnIndex);
-                final String image=phone.getString(contactPhotoIndex);
-                final int type = phone.getInt(contactTypeColumnIndex);
-                if (person.phone == null) {
-                    person.phone = number;
-                    person.phoneLabel=String.valueOf(type);
-                    person.icon=image;
+                while (!phone.isAfterLast()) {
+                    final String number = phone.getString(contactNumberColumnIndex);
+                    final String contactId = phone.getString(contactIdColumnIndex);
+                    final String image = phone.getString(contactPhotoIndex);
+                    final int type = phone.getInt(contactTypeColumnIndex);
+                    if (person.phone == null) {
+                        person.phone = number;
+                        person.phoneLabel = String.valueOf(type);
+                        person.icon = image;
+                    }
+                    if(type==Phone.TYPE_HOME){
+                        person.homePhone=number;
+                    }
+                    phone.moveToNext();
                 }
 
             }

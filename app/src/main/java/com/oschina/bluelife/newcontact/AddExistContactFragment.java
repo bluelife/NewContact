@@ -47,7 +47,7 @@ public class AddExistContactFragment extends Fragment {
     private static final int REQUEST_PICK_FROM_FILE = 2;
     private static final int REQUEST_CROP_INTENT = 3;
     private Person person;
-    private String name="a1";
+    private String name="test";
 
     @Nullable
     @Override

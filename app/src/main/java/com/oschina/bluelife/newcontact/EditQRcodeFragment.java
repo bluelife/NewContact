@@ -119,6 +119,8 @@ public class EditQRcodeFragment extends Fragment {
                     person.address=address.getText().toString();
                     person.company=company.getText().toString();
                     person.email=email.getText().toString();
+                    person.url=website.getText().toString();
+                    person.icon=imagePath;
                     ContactManager.insert(getActivity().getContentResolver(),person);
                     //BusinessCardSource.get().addCard(vcard);
                     Bundle bundle=new Bundle();
@@ -160,7 +162,7 @@ public class EditQRcodeFragment extends Fragment {
                 imagePath=resultUri.getPath();
 
                 //imagePath= FileUtils.getImagePath(getActivity().getContentResolver(),resultUri);
-                Log.w("rrrr",imagePath+" "+resultUri.getPath());
+                Log.w("imagePath",imagePath+" "+resultUri.getPath());
                 //storeImage(result.getBitmap());
                 setIcon(resultUri);
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {

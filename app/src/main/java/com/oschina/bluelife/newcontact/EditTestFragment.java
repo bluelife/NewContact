@@ -53,7 +53,7 @@ public class EditTestFragment extends Fragment {
 
     @OnClick(R.id.create_qrcode)
     void openCreatedQRCode(){
-        String name="aas";
+        String name="test";
 
         boolean hasContact= ContactManager.contactExists(getActivity().getContentResolver(),name);
         if(hasContact){
