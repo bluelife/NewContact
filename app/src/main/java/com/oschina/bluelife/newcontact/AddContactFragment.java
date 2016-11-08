@@ -50,6 +50,11 @@ public class AddContactFragment extends Fragment {
     @BindView(R.id.add_contact_extra)
     EditText extra;
 
+    @BindView(R.id.add_contact_website)
+    EditText website;
+    @BindView(R.id.add_contact_homephone)
+    EditText homePhone;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -96,6 +101,10 @@ public class AddContactFragment extends Fragment {
                     person.title=place.getText().toString();
                     person.extra=extra.getText().toString();
                     person.spell=Format.getPingYin(person.name);
+                    person.url=website.getText().toString();
+                    person.homePhone=homePhone.getText().toString();
+
+
                     //ContactSource.getInstance().addContact(person);
                     ContactManager.insert(getActivity().getContentResolver(),person);
                     MainActivity mainActivity=(MainActivity)getActivity();

@@ -55,6 +55,10 @@ public class EditContactFragment extends Fragment {
     EditText place;
     @BindView(R.id.add_contact_extra)
     EditText extra;
+    @BindView(R.id.add_contact_website)
+    EditText website;
+    @BindView(R.id.add_contact_homephone)
+    EditText homePhone;
     @BindView(R.id.edit_contact_del_btn)
     Button delBtn;
     public static final String KEY_EXIST = "exist";
@@ -90,30 +94,34 @@ public class EditContactFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             isExistItem = bundle.getBoolean(KEY_EXIST);
-
+            ContactFetcher fetcher = new ContactFetcher(getContext());
             if (isExistItem) {
                 index = bundle.getInt(KEY_INDEX);
-                delBtn.setVisibility(View.VISIBLE);
                 person = ContactSource.getInstance().getPerson(index);
+                person=fetcher.fetchSingle(person.name);
 
             } else {
                 personName = bundle.getString(KEY_NAME);
-                ContactFetcher fetcher = new ContactFetcher(getContext());
                 person = fetcher.fetchSingle(personName);
 
             }
-            email.setText(person.email);
-            name.setText(person.name);
-            phone.setText(person.phone);
-            company.setText(person.company);
-            place.setText(person.title);
-            address.setText(person.address);
-            extra.setText(person.extra);
-            department.setText(person.department);
+            email.setText(getText(person.email));
+            name.setText(getText(person.name));
+            phone.setText(getText(person.phone));
+            company.setText(getText(person.company));
+            place.setText(getText(person.title));
+            address.setText(getText(person.address));
+            extra.setText(getText(person.extra));
+            department.setText(getText(person.department));
             contactId = Integer.parseInt(person.id);
+            website.setText(getText(person.url));
+            homePhone.setText(getText(person.homePhone));
         }
     }
 
+    private String getText(String target){
+        return target==null?"":target;
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

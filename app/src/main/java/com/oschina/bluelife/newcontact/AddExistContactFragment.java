@@ -47,7 +47,8 @@ public class AddExistContactFragment extends Fragment {
     private static final int REQUEST_PICK_FROM_FILE = 2;
     private static final int REQUEST_CROP_INTENT = 3;
     private Person person;
-    private String name="test";
+    private String name;
+    public static final String KEY_NAME="key_name";
 
     @Nullable
     @Override
@@ -57,6 +58,10 @@ public class AddExistContactFragment extends Fragment {
         setHasOptionsMenu(true);
         Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.exist_contact_title));
+        Bundle bundle=getArguments();
+        if(null!=bundle) {
+            name=bundle.getString(KEY_NAME);
+        }
         return view;
     }
 
@@ -66,8 +71,10 @@ public class AddExistContactFragment extends Fragment {
         ContactFetcher fetcher=new ContactFetcher(getContext());
 
         boolean hasContact= ContactManager.contactExists(getActivity().getContentResolver(),name);
+        Log.w("ttttttt"," "+hasContact+" ,"+name);
         if(hasContact){
             person=fetcher.fetchSingle(name);
+            Log.w("ttttttt",""+person.name);
             nameText.setText(person.name);
             email.setText(person.email);
             //if(person.icon!=null) {

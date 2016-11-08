@@ -25,46 +25,49 @@ import android.provider.ContactsContract.Data;
 
 public class ContactFetcher {
     private final Context context;
+    private final String ORDER="upper(" + Phone.DISPLAY_NAME + ") ASC";
     private String[] projectionFields = new String[]{
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.DISPLAY_NAME,
             ContactsContract.Contacts.TIMES_CONTACTED
     };
+    private CursorLoader cursorLoader;
 
     public ContactFetcher(Context c) {
         this.context = c;
+        cursorLoader = new CursorLoader(context,
+                ContactsContract.Contacts.CONTENT_URI,
+                projectionFields, // the columns to retrieve
+                ContactsContract.Contacts.HAS_PHONE_NUMBER + "=?", // the selection criteria (none)
+                new String[] {"1"}, // the selection args (none)
+                ORDER // the sort order (default)
+        );
     }
 
     public ArrayList<Person> fetchAll() {
 
         ArrayList<Person> listContacts = new ArrayList<>();
-        CursorLoader cursorLoader = new CursorLoader(context,
-                ContactsContract.Contacts.CONTENT_URI,
-                projectionFields, // the columns to retrieve
-                null, // the selection criteria (none)
-                null, // the selection args (none)
-                "upper(" + Phone.DISPLAY_NAME + ") ASC" // the sort order (default)
-        );
-
         Cursor c = cursorLoader.loadInBackground();
-
-        final Map<String, Person> contactsMap = new HashMap<>(c.getCount());
 
         if (c.moveToFirst()) {
 
             int idIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
             int nameIndex = c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
             int timesIndex=c.getColumnIndex(ContactsContract.Contacts.TIMES_CONTACTED);
+            //int rowIdIndex=c.getColumnIndex(ContactsContract.RawContacts._ID);
             do {
                 String contactId = c.getString(idIndex);
+                //String rowId=c.getString(rowIdIndex);
+
                 int count=c.getInt(timesIndex);
                 String contactDisplayName = c.getString(nameIndex);
                 Person person = new Person(contactDisplayName,"","");
                 person.id = contactId;
                 person.connectCount=count;
-                Log.w("count",count+"d "+contactDisplayName);
-                loadPersonData(person,contactId);
-                contactsMap.put(contactId, person);
+
+                //person.email=email;
+                loadPersonListData(person,contactId);
+                //contactsMap.put(contactId, person);
                 listContacts.add(person);
 
             } while (c.moveToNext());
@@ -72,6 +75,15 @@ public class ContactFetcher {
 
         c.close();
         return listContacts;
+    }
+    private void loadPersonListData(Person person,String contactId){
+        //person.rowId=getRawContactId(contactId);
+        //matchContactNumbers(person,contactId);
+        //matchOrg(person, contactId);
+        //matchNote(person, contactId);
+        //matchAddress(person,contactId);
+        //matchWebsite(person,contactId);
+        matchContactEmails(person,contactId);
     }
     private void loadPersonData(Person person,String contactId){
         person.rowId=getRawContactId(contactId);
@@ -139,26 +151,27 @@ public class ContactFetcher {
         if (phone != null) {
             final int contactNumberColumnIndex = phone.getColumnIndex(Phone.NUMBER);
             final int contactTypeColumnIndex = phone.getColumnIndex(Phone.TYPE);
-            final int contactIdColumnIndex = phone.getColumnIndex(Phone.CONTACT_ID);
-            final int contactPhotoIndex=phone.getColumnIndex(Phone.PHOTO_URI);
-            final int contactPhoneLabel=phone.getColumnIndex(Phone.LABEL);
+            //final int contactIdColumnIndex = phone.getColumnIndex(Phone.CONTACT_ID);
+            //final int contactPhotoIndex=phone.getColumnIndex(Phone.PHOTO_URI);
+            //final int contactPhoneLabel=phone.getColumnIndex(Phone.LABEL);
             //Uri photo = ContentUris.withAppendedId( ContactsContract.Contacts.CONTENT_URI, Integer.valueOf(id));
             //photo = Uri.withAppendedPath( photo, ContactsContract.Contacts.Photo.PHOTO_URI );
             if (phone.moveToFirst()) {
 
                 while (!phone.isAfterLast()) {
                     final String number = phone.getString(contactNumberColumnIndex);
-                    final String contactId = phone.getString(contactIdColumnIndex);
-                    final String image = phone.getString(contactPhotoIndex);
+                    //final String contactId = phone.getString(contactIdColumnIndex);
+                    //final String image = phone.getString(contactPhotoIndex);
                     final int type = phone.getInt(contactTypeColumnIndex);
                     if (person.phone == null) {
                         person.phone = number;
                         person.phoneLabel = String.valueOf(type);
-                        person.icon = image;
+                        //person.icon = image;
                     }
                     if(type==Phone.TYPE_HOME){
                         person.homePhone=number;
                     }
+
                     phone.moveToNext();
                 }
 
@@ -184,9 +197,9 @@ public class ContactFetcher {
         // Get email
         final String[] emailProjection = new String[]{
                 Email.DATA,
-                Email.TYPE,
-                Email.LABEL,
-                Email.CONTACT_ID,
+                Email.TYPE
+                //Email.LABEL,
+                //Email.CONTACT_ID,
         };
         String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
         String[] whereParameters = new String[]{id,

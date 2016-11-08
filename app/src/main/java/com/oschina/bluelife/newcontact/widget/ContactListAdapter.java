@@ -176,7 +176,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<BaseViewHolder> imp
             final int pos=getModelPosition(model);
 
             ViewCompat.setActivated(rootView,selectedItems.get(pos,false));
-            byte[] bytes= ContactManager.openPhoto(context.getContentResolver(),Long.parseLong(model.getPerson().rowId));
+            byte[] bytes= ContactManager.openPhoto(context.getContentResolver(),Long.parseLong(model.getPerson().id));
             Glide.with(context).load(bytes)
                         .bitmapTransform(new RoundedCornersTransformation(context,10,2)).
                     placeholder(R.drawable.avatar).into(avatar);

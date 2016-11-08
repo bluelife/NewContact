@@ -90,6 +90,36 @@
             android:textColorHint="#0088cc"
             android:layout_height="wrap_content" />
     </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/phone_add"
+            android:text="添加座机"
+
+            android:textColor="#0066dd"
+            android:gravity="center_vertical"/>
+
+        <EditText
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:ems="10"
+            android:id="@+id/add_contact_homephone"
+            android:inputType="phone"
+            android:layout_gravity="center_vertical"
+            android:textColorHint="#0088cc"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -154,6 +184,26 @@
 
         <EditText
             android:id="@+id/add_contact_place"
+            android:layout_marginLeft="@dimen/edit_dist_left"
+            android:layout_weight="1"
+            android:background="@drawable/apptheme_edit_text_holo_light"
+            android:layout_width="0dp"
+            android:maxLines="1"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/contact_edit_dist"
+        android:layout_marginBottom="@dimen/contact_edit_dist"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="网址"/>
+
+        <EditText
+            android:id="@+id/add_contact_website"
             android:layout_marginLeft="@dimen/edit_dist_left"
             android:layout_weight="1"
             android:background="@drawable/apptheme_edit_text_holo_light"

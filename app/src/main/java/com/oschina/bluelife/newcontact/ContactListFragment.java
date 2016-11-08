@@ -2,6 +2,7 @@ package com.oschina.bluelife.newcontact;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -26,6 +27,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.oschina.bluelife.newcontact.Utils.Const;
 
@@ -61,6 +63,8 @@ public class ContactListFragment extends Fragment implements
         ActionMode.Callback, ContactListAdapter.ItemListener {
     @BindView(R.id.list_contacts)
     RecyclerView contactsView;
+    @BindView(R.id.list_progress)
+    ProgressBar progressBar;
 
     @BindView(R.id.fastscroller)
     RecyclerViewFastScroller fastScroller;
@@ -69,6 +73,7 @@ public class ContactListFragment extends Fragment implements
     ActionMode actionMode;
     private ContactListAdapter contactListAdapter;
     private List<Person> contacts;
+    private ContactFetcher contactFetcher;
     private static final int CONTACTS_LOADER_ID = 1;
     GestureDetectorCompat gestureDetector;
     @Nullable
@@ -80,8 +85,6 @@ public class ContactListFragment extends Fragment implements
         Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.contact_list_title));
         toolbar.setSubtitle("123445556@cctv.com");
-        contacts=new ContactFetcher(getContext()).fetchAll();
-        ContactSource.getInstance().init(contacts,getString(R.string.contact_list_most_connect));
         return view;
     }
 
@@ -95,17 +98,10 @@ public class ContactListFragment extends Fragment implements
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        ContactSource contactSource=ContactSource.getInstance();
-        contactListAdapter=new ContactListAdapter(getActivity(),contactSource.getContactViewModels());
-        LinearLayoutManager layoutManager=new LinearLayoutManager(getContext());
-        layoutManager.setAutoMeasureEnabled(true);
-        contactsView.setLayoutManager(layoutManager);
-        contactsView.setAdapter(contactListAdapter);
-        contactsView.setItemAnimator(new DefaultItemAnimator());
-        fastScroller.setRecyclerView(contactsView);
-        fastScroller.setUpAlphabet(contactSource.getAlphabetItems());
-        contactListAdapter.setItemListener(this);
+        contactFetcher=new ContactFetcher(getContext());
+        contactsView.setVisibility(View.GONE);
+        fastScroller.setVisibility(View.GONE);
+        new LoadContactsTask().execute();
 
     }
 
@@ -186,6 +182,7 @@ public class ContactListFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
+        if(contactListAdapter!=null)
         contactListAdapter.notifyDataSetChanged();
     }
 
@@ -222,11 +219,52 @@ public class ContactListFragment extends Fragment implements
         //open edit fragment
 
     }
+    private void onLoadedData(){
+        progressBar.setVisibility(View.GONE);
+        contactsView.setVisibility(View.VISIBLE);
+        fastScroller.setVisibility(View.VISIBLE);
+        ContactSource contactSource=ContactSource.getInstance();
+        contactListAdapter=new ContactListAdapter(getActivity(),contactSource.getContactViewModels());
+        contactListAdapter.setItemListener(this);
+        LinearLayoutManager layoutManager=new LinearLayoutManager(getContext());
+        layoutManager.setAutoMeasureEnabled(true);
+        contactsView.setLayoutManager(layoutManager);
+        contactsView.setAdapter(contactListAdapter);
+        contactsView.setItemAnimator(new DefaultItemAnimator());
+        fastScroller.setRecyclerView(contactsView);
+        fastScroller.setUpAlphabet(contactSource.getAlphabetItems());
+    }
 
     private void toggleSelection(int index) {
         contactListAdapter.toggleSelection(index);
         String selectCount=getString(R.string.select_count,contactListAdapter.getSelectedItemCount());
         actionMode.setTitle(selectCount);
+    }
+
+    private class LoadContactsTask extends AsyncTask<Void,Void,Void>{
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+                long oldTime = System.currentTimeMillis();
+                Log.w("filltime", System.currentTimeMillis() + "");
+                contacts = contactFetcher.fetchAll();
+            if(isAdded()) {
+                ContactSource.getInstance().init(contacts, getString(R.string.contact_list_most_connect));
+            }
+            Log.w("filltime", "" + (System.currentTimeMillis() - oldTime));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if(isAdded())
+              onLoadedData();
+        }
     }
 
 }

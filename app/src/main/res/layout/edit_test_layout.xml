@@ -3,33 +3,34 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <EditText
+        android:id="@+id/contact_edit"
+        android:hint="enter contact name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="edit_new"
-        android:id="@+id/edit_test_new"/>
+        android:layout_height="wrap_content" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="open_exist"
-        android:id="@+id/edit_test_exist"/>
+        android:text="open_contact"
+        android:id="@+id/open_contact"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="open_contacts"
         android:id="@+id/open_contacts"/>
 
+    <EditText
+        android:id="@+id/qr_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="enter contact name"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="open qrcode"
         android:id="@+id/create_qrcode"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="create qrcode"
-        android:id="@+id/open_qrcode"/>
+
 
     <Button
         android:layout_width="wrap_content"

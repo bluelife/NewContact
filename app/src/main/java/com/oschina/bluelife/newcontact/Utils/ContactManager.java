@@ -233,6 +233,7 @@ public class ContactManager {
                     .withValue(Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE)
                     .withValue(ContactsContract.CommonDataKinds.Website.URL,person.url)
                     .build());
+            Log.w("ssss","save"+person.url);
         }
         //------------------------------------------------------ Organization
 

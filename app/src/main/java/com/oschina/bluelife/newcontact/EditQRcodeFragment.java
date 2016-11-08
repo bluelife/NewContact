@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
@@ -16,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -24,9 +26,12 @@ import com.oschina.bluelife.newcontact.Utils.ContactManager;
 import com.oschina.bluelife.newcontact.Utils.FileUtils;
 import com.oschina.bluelife.newcontact.Utils.Format;
 import com.oschina.bluelife.newcontact.Utils.UIHelper;
+import com.oschina.bluelife.newcontact.database.LogoManager;
 import com.oschina.bluelife.newcontact.model.BusinessCardSource;
+import com.oschina.bluelife.newcontact.model.OrgLogo;
 import com.oschina.bluelife.newcontact.model.Person;
 import com.oschina.bluelife.newcontact.model.Vcard;
+import com.oschina.bluelife.newcontact.widget.ContactFetcher;
 import com.oschina.bluelife.newcontact.widget.transform.RoundedCornersTransformation;
 import com.theartofdev.edmodo.cropper.CropImage;
 
@@ -42,6 +47,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * Created by HiWin10 on 2016/10/21.
@@ -70,6 +76,8 @@ public class EditQRcodeFragment extends Fragment {
     private static final int REQUEST_PICK_FROM_FILE = 2;
     private static final int REQUEST_CROP_INTENT = 3;
     private String imagePath;
+    private Handler handler = new Handler();
+    private LogoManager logoManager;
 
 
     @Nullable
@@ -80,12 +88,22 @@ public class EditQRcodeFragment extends Fragment {
         Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.edit_card_title));
         ButterKnife.bind(this,view);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInputFromWindow(email.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+                email.requestFocus();
+            }
+        }, 300);
+        email.setText("3355802@qq.com");
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        logoManager=new LogoManager(getContext());
     }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -122,6 +140,9 @@ public class EditQRcodeFragment extends Fragment {
                     person.url=website.getText().toString();
                     person.icon=imagePath;
                     ContactManager.insert(getActivity().getContentResolver(),person);
+                    ContactFetcher fetcher=new ContactFetcher(getContext());
+                    Person person2=fetcher.fetchSingle(person.name);
+                    logoManager.insert(Long.parseLong(person2.rowId),imagePath,person.name);
                     //BusinessCardSource.get().addCard(vcard);
                     Bundle bundle=new Bundle();
                     bundle.putString(BusinessCardFragment.KEY_INDEX,person.name);
@@ -160,6 +181,7 @@ public class EditQRcodeFragment extends Fragment {
                 Uri resultUri = result.getUri();
                 String fileName=resultUri.getPath().substring(resultUri.getPath().lastIndexOf(File.separator));
                 imagePath=resultUri.getPath();
+
 
                 //imagePath= FileUtils.getImagePath(getActivity().getContentResolver(),resultUri);
                 Log.w("imagePath",imagePath+" "+resultUri.getPath());
