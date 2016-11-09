@@ -138,6 +138,7 @@ public class ContactFetcher {
     public void matchContactNumbers(Person person,String id) {
         // Get numbers
         final String[] numberProjection = new String[]{
+                Phone._ID,
                 Phone.NUMBER,
                 Phone.TYPE,
                 Phone.LABEL,
@@ -151,26 +152,32 @@ public class ContactFetcher {
         if (phone != null) {
             final int contactNumberColumnIndex = phone.getColumnIndex(Phone.NUMBER);
             final int contactTypeColumnIndex = phone.getColumnIndex(Phone.TYPE);
+            final int phoneIdIndex=phone.getColumnIndex(Phone._ID);
             //final int contactIdColumnIndex = phone.getColumnIndex(Phone.CONTACT_ID);
             //final int contactPhotoIndex=phone.getColumnIndex(Phone.PHOTO_URI);
             //final int contactPhoneLabel=phone.getColumnIndex(Phone.LABEL);
             //Uri photo = ContentUris.withAppendedId( ContactsContract.Contacts.CONTENT_URI, Integer.valueOf(id));
             //photo = Uri.withAppendedPath( photo, ContactsContract.Contacts.Photo.PHOTO_URI );
             if (phone.moveToFirst()) {
-
                 while (!phone.isAfterLast()) {
                     final String number = phone.getString(contactNumberColumnIndex);
+                    final long phoneId=phone.getLong(phoneIdIndex);
                     //final String contactId = phone.getString(contactIdColumnIndex);
                     //final String image = phone.getString(contactPhotoIndex);
                     final int type = phone.getInt(contactTypeColumnIndex);
-                    if (person.phone == null) {
-                        person.phone = number;
-                        person.phoneLabel = String.valueOf(type);
-                        //person.icon = image;
-                    }
+
                     if(type==Phone.TYPE_HOME){
                         person.homePhone=number;
+                        person.homeId=phoneId;
                     }
+
+                    else if (type==Phone.TYPE_MOBILE) {
+                            person.phone = number;
+                        person.mobileId=phoneId;
+                            person.phoneLabel = String.valueOf(type);
+                            //person.icon = image;
+                    }
+
 
                     phone.moveToNext();
                 }

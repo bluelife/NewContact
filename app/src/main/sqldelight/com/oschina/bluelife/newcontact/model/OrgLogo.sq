@@ -1,0 +1,25 @@
+CREATE TABLE org_logo (
+  _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  contactId INTEGER NOT NULL,
+  image TEXT NOT NULL,
+  name TEXT NOT NULL
+);
+
+-- Further SQL statements are proceeded by an identifier.
+select_all:
+SELECT *
+FROM org_logo;
+
+insert_row:
+INSERT INTO org_logo(contactId,image,name)
+VALUES (? ,? , ?);
+
+select_Logo:
+SELECT *
+FROM org_logo
+WHERE contactId = ?;
+
+update_logo:
+UPDATE org_logo
+SET image = ?
+WHERE contactId = ?;

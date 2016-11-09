@@ -15,8 +15,10 @@ public class Person {
     public String emailLabel;
     public String icon;
     public String phone;
+    public long mobileId;
     public String phoneLabel;
     public String homePhone;
+    public long homeId;
 
     public String company;
     public String department;

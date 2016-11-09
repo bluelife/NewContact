@@ -184,6 +184,8 @@ public class EditContactFragment extends Fragment {
         person.title = place.getText().toString();
         person.address = address.getText().toString();
         person.extra = extra.getText().toString();
+        person.homePhone=homePhone.getText().toString();
+        person.url=website.getText().toString();
         ContactManager.update(getActivity().getContentResolver(), person, getContext());
         getActivity().onBackPressed();
     }

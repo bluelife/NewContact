@@ -65,12 +65,24 @@ public class ContactManager {
 
 
             //update name
-            ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-                    .withSelection(Data.RAW_CONTACT_ID + " = ? AND "
-                            + Data.MIMETYPE + " = ? AND "
-                            +Phone.TYPE + " = ? ", new String[] {person.rowId,Phone.CONTENT_ITEM_TYPE,person.phoneLabel})
-                    .withValue(Phone.NUMBER,person.phone)
-                    .build());
+            if(checkPhoneExist(context,person.rowId)){
+                ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+                        .withSelection(Data.RAW_CONTACT_ID+"= ? AND "
+                                +Data.MIMETYPE+" = ? AND "
+                                +Data._ID+" =?",new String[]{person.rowId, Phone.CONTENT_ITEM_TYPE,person.mobileId+""})
+                        .withValue(Phone.NUMBER,person.phone)
+                        .withValue(Phone.TYPE,Phone.TYPE_MOBILE)
+                        .build());
+
+            }
+            else{
+                ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                        .withValue(Data.RAW_CONTACT_ID, person.rowId)
+                        .withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+                        .withValue(Phone.NUMBER,person.phone)
+                        .withValue(Phone.TYPE,Phone.TYPE_MOBILE)
+                        .build());
+            }
 
             ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
                    .withSelection(Data.RAW_CONTACT_ID + " = ? AND "
@@ -146,6 +158,37 @@ public class ContactManager {
                         .withValue(Data.RAW_CONTACT_ID, person.rowId)
                         .withValue(Data.MIMETYPE, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE)
                         .withValue(ContactsContract.CommonDataKinds.Note.NOTE,person.extra)
+                        .build());
+            }
+            if(checkWebsiteExist(context,person.rowId)){
+                ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+                .withSelection(Data.RAW_CONTACT_ID+"= ? AND "
+                +Data.MIMETYPE+" = ?",new String[]{person.rowId, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE})
+                        .withValue(ContactsContract.CommonDataKinds.Website.URL,person.url)
+                        .build());
+            }
+            else{
+                ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                        .withValue(Data.RAW_CONTACT_ID, person.rowId)
+                        .withValue(Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Website.URL,person.url)
+                        .build());
+            }
+            if(checkHomePhoneExist(context,person.rowId)){
+                ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+                        .withSelection(Data.RAW_CONTACT_ID+"= ? AND "
+                                +Data.MIMETYPE+" = ? AND "
+                                +Data._ID+" = ?",new String[]{person.rowId, Phone.CONTENT_ITEM_TYPE,person.homeId+""})
+                        .withValue(Phone.NUMBER,person.homePhone)
+                        .withValue(Phone.TYPE,Phone.TYPE_HOME)
+                        .build());
+            }
+            else{
+                ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                        .withValue(Data.RAW_CONTACT_ID, person.rowId)
+                        .withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+                        .withValue(Phone.NUMBER,person.homePhone)
+                        .withValue(Phone.TYPE,Phone.TYPE_HOME)
                         .build());
             }
             cr.applyBatch(ContactsContract.AUTHORITY, ops);
@@ -303,6 +346,66 @@ public class ContactManager {
             exist=false;
         return exist;
     }
+    public static boolean checkWebsiteExist(Context context,String id){
+        final String[] projection=new String[]{
+                ContactsContract.CommonDataKinds.Website.URL
+        };
+        String where = Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE};
+        Cursor cursor=new CursorLoader(context, Data.CONTENT_URI,projection,where,whereParameters,null).loadInBackground();
+        boolean flag=cursor.getCount()>0;
+        cursor.close();
+        return flag;
+    }
+    public static boolean checkHomePhoneExist(Context context,String id){
+        final String[] projection=new String[]{
+                Phone.NUMBER,
+                Phone.TYPE
+        };
+        String where = Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE};
+        Cursor cursor=new CursorLoader(context, Data.CONTENT_URI,projection,where,whereParameters,null).loadInBackground();
+        cursor.moveToFirst();
+        final int contactNumberColumnIndex = cursor.getColumnIndex(Phone.NUMBER);
+        final int contactTypeColumnIndex = cursor.getColumnIndex(Phone.TYPE);
+        boolean flag=false;
+        while (!cursor.isAfterLast()){
+            final int type = cursor.getInt(contactTypeColumnIndex);
+            if(type==Phone.TYPE_HOME){
+                flag=true;
+                break;
+            }
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return flag;
+    }
+    public static boolean checkPhoneExist(Context context,String id){
+        final String[] projection=new String[]{
+                Phone.NUMBER,
+                Phone.TYPE
+        };
+        String where = Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+        String[] whereParameters = new String[]{id,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE};
+        Cursor cursor=new CursorLoader(context, Data.CONTENT_URI,projection,where,whereParameters,null).loadInBackground();
+        cursor.moveToFirst();
+        final int contactNumberColumnIndex = cursor.getColumnIndex(Phone.NUMBER);
+        final int contactTypeColumnIndex = cursor.getColumnIndex(Phone.TYPE);
+        boolean flag=false;
+        while (!cursor.isAfterLast()){
+            final int type = cursor.getInt(contactTypeColumnIndex);
+            if(type==Phone.TYPE_MOBILE){
+                flag=true;
+                break;
+            }
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return flag;
+    }
     public static boolean checkEmailExist(Context context,String id){
         final String[] emailProjection = new String[]{
                 Email.DATA,
@@ -317,7 +420,6 @@ public class ContactManager {
                 Email.RAW_CONTACT_ID+"= ?",
                 new String[]{id},
                 null).loadInBackground();
-        Log.w("emailcurosr",email.getCount()+"");
         boolean hasEmail=email.getCount()>0;
         email.close();
         return hasEmail;

@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.zxing.WriterException;
 import com.oschina.bluelife.newcontact.Utils.Const;
 import com.oschina.bluelife.newcontact.Utils.ContactManager;
@@ -29,6 +30,7 @@ import com.oschina.bluelife.newcontact.model.OrgLogo;
 import com.oschina.bluelife.newcontact.model.Person;
 import com.oschina.bluelife.newcontact.model.Vcard;
 import com.oschina.bluelife.newcontact.widget.ContactFetcher;
+import com.oschina.bluelife.newcontact.widget.transform.RoundedCornersTransformation;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -65,6 +67,8 @@ public class BusinessCardFragment extends Fragment {
     TextView website;
     @BindView(R.id.qrcode_person_address)
     TextView address;
+    @BindView(R.id.qrcode_logo)
+    ImageView logo;
     public static String KEY_INDEX="index";
     //public static String KEY_ICON="icon";
     String index;
@@ -130,6 +134,7 @@ public class BusinessCardFragment extends Fragment {
         person=fetcher.fetchSingle(index);
         Cursor cursor=logoManager.query(Long.parseLong(person.rowId));
         if(cursor!=null) {
+            Log.w("savedlogo",cursor.moveToFirst()+" "+cursor);
             if(cursor.moveToFirst()) {
                 OrgLogo orgLogo = OrgLogo.FACTORY.select_LogoMapper().map(cursor);
                 logoPath=orgLogo.image();
@@ -147,14 +152,17 @@ public class BusinessCardFragment extends Fragment {
         email.setText(person.email);
         website.setText(person.url);
         address.setText(person.address);
+
         createQRLogo();
     }
     private void createQRLogo(){
         Bitmap bmp = getIcon();
         Moshi moshi=new Moshi.Builder().build();
         JsonAdapter<Person> jsonAdapter=moshi.adapter(Person.class);
+        Glide.with(this).load(logoPath).bitmapTransform(new RoundedCornersTransformation(getContext(),15,2)).placeholder(R.drawable.logo_wenzi).into(logo);
         String info= jsonAdapter.toJson(person);
         QRCodeEncoder qrCodeEncoder=new QRCodeEncoder(info,Const.ICON_SIZE,bmp);
+
         try {
             Bitmap bitmap=qrCodeEncoder.encodeAsBitmap();
             cardView.setImageBitmap(bitmap);
