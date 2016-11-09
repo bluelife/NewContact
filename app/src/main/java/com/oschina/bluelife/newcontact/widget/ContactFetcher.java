@@ -18,14 +18,16 @@ import com.oschina.bluelife.newcontact.model.Person;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import android.provider.ContactsContract.Data;
+
 /**
  * Created by slomka.jin on 2016/11/1.
  */
 
 public class ContactFetcher {
     private final Context context;
-    private final String ORDER="upper(" + Phone.DISPLAY_NAME + ") ASC";
+    private final String ORDER = "upper(" + Phone.DISPLAY_NAME + ") ASC";
     private String[] projectionFields = new String[]{
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.DISPLAY_NAME,
@@ -39,7 +41,7 @@ public class ContactFetcher {
                 ContactsContract.Contacts.CONTENT_URI,
                 projectionFields, // the columns to retrieve
                 ContactsContract.Contacts.HAS_PHONE_NUMBER + "=?", // the selection criteria (none)
-                new String[] {"1"}, // the selection args (none)
+                new String[]{"1"}, // the selection args (none)
                 ORDER // the sort order (default)
         );
     }
@@ -53,20 +55,20 @@ public class ContactFetcher {
 
             int idIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
             int nameIndex = c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-            int timesIndex=c.getColumnIndex(ContactsContract.Contacts.TIMES_CONTACTED);
+            int timesIndex = c.getColumnIndex(ContactsContract.Contacts.TIMES_CONTACTED);
             //int rowIdIndex=c.getColumnIndex(ContactsContract.RawContacts._ID);
             do {
                 String contactId = c.getString(idIndex);
                 //String rowId=c.getString(rowIdIndex);
 
-                int count=c.getInt(timesIndex);
+                int count = c.getInt(timesIndex);
                 String contactDisplayName = c.getString(nameIndex);
-                Person person = new Person(contactDisplayName,"","");
+                Person person = new Person(contactDisplayName, "", "");
                 person.id = contactId;
-                person.connectCount=count;
+                person.connectCount = count;
 
                 //person.email=email;
-                loadPersonListData(person,contactId);
+                loadPersonListData(person, contactId);
                 //contactsMap.put(contactId, person);
                 listContacts.add(person);
 
@@ -76,25 +78,28 @@ public class ContactFetcher {
         c.close();
         return listContacts;
     }
-    private void loadPersonListData(Person person,String contactId){
+
+    private void loadPersonListData(Person person, String contactId) {
         //person.rowId=getRawContactId(contactId);
         //matchContactNumbers(person,contactId);
         //matchOrg(person, contactId);
         //matchNote(person, contactId);
         //matchAddress(person,contactId);
         //matchWebsite(person,contactId);
-        matchContactEmails(person,contactId);
+        matchContactEmails(person, contactId);
     }
-    private void loadPersonData(Person person,String contactId){
-        person.rowId=getRawContactId(contactId);
-        matchContactNumbers(person,contactId);
+
+    private void loadPersonData(Person person, String contactId) {
+        person.rowId = getRawContactId(contactId);
+        matchContactNumbers(person, contactId);
         matchOrg(person, contactId);
         matchNote(person, contactId);
-        matchAddress(person,contactId);
-        matchWebsite(person,contactId);
-        matchContactEmails(person,contactId);
+        matchAddress(person, contactId);
+        matchWebsite(person, contactId);
+        matchContactEmails(person, contactId);
     }
-    public Person fetchSingle(String name){
+
+    public Person fetchSingle(String name) {
         String where = Data.DISPLAY_NAME + " = ? ";
         String[] whereParameters = new String[]{name};
         CursorLoader cursorLoader = new CursorLoader(context,
@@ -105,29 +110,29 @@ public class ContactFetcher {
                 "upper(" + Phone.DISPLAY_NAME + ") ASC" // the sort order (default)
         );
 
-        Person person=null;
+        Person person = null;
         Cursor c = cursorLoader.loadInBackground();
-        if(c!=null){
-            if(c.moveToFirst()){
+        if (c != null) {
+            if (c.moveToFirst()) {
                 int idIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
                 String contactId = c.getString(idIndex);
-                person = new Person(name,"","");
+                person = new Person(name, "", "");
                 person.id = contactId;
-                loadPersonData(person,contactId);
+                loadPersonData(person, contactId);
 
             }
             c.close();
         }
         return person;
     }
-    public String getRawContactId(String contactId)
-    {
-        String[] projection=new String[]{ContactsContract.RawContacts._ID};
-        String selection=ContactsContract.RawContacts.CONTACT_ID+"=?";
-        String[] selectionArgs=new String[]{contactId};
-        String rowId="-1";
-        Cursor c=context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI,projection,selection,selectionArgs , null);
-        if(c.moveToFirst()) {
+
+    public String getRawContactId(String contactId) {
+        String[] projection = new String[]{ContactsContract.RawContacts._ID};
+        String selection = ContactsContract.RawContacts.CONTACT_ID + "=?";
+        String[] selectionArgs = new String[]{contactId};
+        String rowId = "-1";
+        Cursor c = context.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, projection, selection, selectionArgs, null);
+        if (c.moveToFirst()) {
             rowId = c.getString(c.getColumnIndex(ContactsContract.RawContacts._ID));
             //Log.d("raww", "Contact Id: " + contactId + " Raw Contact Id: " + rowId);
 
@@ -135,7 +140,8 @@ public class ContactFetcher {
         c.close();
         return rowId;
     }
-    public void matchContactNumbers(Person person,String id) {
+
+    public void matchContactNumbers(Person person, String id) {
         // Get numbers
         final String[] numberProjection = new String[]{
                 Phone._ID,
@@ -146,13 +152,13 @@ public class ContactFetcher {
                 Phone.PHOTO_URI
         };
         String where = Data.CONTACT_ID + " = ? AND " + Data.MIMETYPE + " = ?";
-        String[] whereParameters = new String[]{id,Phone.CONTENT_ITEM_TYPE};
+        String[] whereParameters = new String[]{id, Phone.CONTENT_ITEM_TYPE};
         Cursor phone = context.getContentResolver().query(Data.CONTENT_URI, numberProjection, where, whereParameters, null);
 
         if (phone != null) {
             final int contactNumberColumnIndex = phone.getColumnIndex(Phone.NUMBER);
             final int contactTypeColumnIndex = phone.getColumnIndex(Phone.TYPE);
-            final int phoneIdIndex=phone.getColumnIndex(Phone._ID);
+            final int phoneIdIndex = phone.getColumnIndex(Phone._ID);
             //final int contactIdColumnIndex = phone.getColumnIndex(Phone.CONTACT_ID);
             //final int contactPhotoIndex=phone.getColumnIndex(Phone.PHOTO_URI);
             //final int contactPhoneLabel=phone.getColumnIndex(Phone.LABEL);
@@ -161,21 +167,19 @@ public class ContactFetcher {
             if (phone.moveToFirst()) {
                 while (!phone.isAfterLast()) {
                     final String number = phone.getString(contactNumberColumnIndex);
-                    final long phoneId=phone.getLong(phoneIdIndex);
+                    final long phoneId = phone.getLong(phoneIdIndex);
                     //final String contactId = phone.getString(contactIdColumnIndex);
                     //final String image = phone.getString(contactPhotoIndex);
                     final int type = phone.getInt(contactTypeColumnIndex);
 
-                    if(type==Phone.TYPE_HOME){
-                        person.homePhone=number;
-                        person.homeId=phoneId;
-                    }
-
-                    else if (type==Phone.TYPE_MOBILE) {
-                            person.phone = number;
-                        person.mobileId=phoneId;
-                            person.phoneLabel = String.valueOf(type);
-                            //person.icon = image;
+                    if (type == Phone.TYPE_HOME) {
+                        person.homePhone = number;
+                        person.homeId = phoneId;
+                    } else if (type == Phone.TYPE_MOBILE) {
+                        person.phone = number;
+                        person.mobileId = phoneId;
+                        person.phoneLabel = String.valueOf(type);
+                        //person.icon = image;
                     }
 
 
@@ -188,19 +192,19 @@ public class ContactFetcher {
 
     }
 
-    public void matchPhoto(Person person,String id){
+    public void matchPhoto(Person person, String id) {
         String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
         String[] whereParameters = new String[]{id,
                 ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE};
         Cursor cursor = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
-        if(cursor.moveToFirst()){
+        if (cursor.moveToFirst()) {
 
             //String path=cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_FILE_ID))
         }
 
     }
 
-    public void matchContactEmails(Person person,String id) {
+    public void matchContactEmails(Person person, String id) {
         // Get email
         final String[] emailProjection = new String[]{
                 Email.DATA,
@@ -317,7 +321,8 @@ public class ContactFetcher {
             addrCur.close();
         }
     }
-    public void matchWebsite(Person person,String id) {
+
+    public void matchWebsite(Person person, String id) {
         String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
         String[] whereParameters = new String[]{id,
                 ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE};

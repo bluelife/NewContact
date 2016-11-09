@@ -12,6 +12,7 @@ public class Const {
     public final static String STAR="☆";
     public final static String CRAP="#";
     public final static int ICON_SIZE=320;
+
     public static String getStarAscii(){
         return STAR.charAt(0)+"";
     }

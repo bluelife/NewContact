@@ -105,9 +105,10 @@ public class EditContactFragment extends Fragment {
                 person = fetcher.fetchSingle(personName);
 
             }
+            String phoneFromat=person.phone==null?"":person.phone.replaceAll("\\s","").replace("-","");
             email.setText(getText(person.email));
             name.setText(getText(person.name));
-            phone.setText(getText(person.phone));
+            phone.setText(getText(phoneFromat));
             company.setText(getText(person.company));
             place.setText(getText(person.title));
             address.setText(getText(person.address));

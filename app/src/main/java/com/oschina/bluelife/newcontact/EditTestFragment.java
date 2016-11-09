@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.oschina.bluelife.newcontact.Utils.ContactManager;
+import com.oschina.bluelife.newcontact.Utils.Format;
 import com.oschina.bluelife.newcontact.model.OrgLogoModel;
 import com.oschina.bluelife.newcontact.model.Person;
 import com.oschina.bluelife.newcontact.widget.ContactFetcher;

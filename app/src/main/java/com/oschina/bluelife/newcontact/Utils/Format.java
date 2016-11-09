@@ -1,5 +1,7 @@
 package com.oschina.bluelife.newcontact.Utils;
 
+import android.util.Log;
+
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -7,11 +9,15 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created by HiWin10 on 2016/10/19.
  */
 
 public class Format {
+    public final static String PHONE_FORMAT="^((\\+86)|(86))?1[3458][0-9]{9}$";
     public final static boolean isValidEmail(CharSequence target) {
         if (target == null) {
             return false;
@@ -22,7 +28,10 @@ public class Format {
     public static boolean isValidPhone(CharSequence target){
         if(target==null)
             return false;
-        return target.length()==11;
+        Pattern pattern=Pattern.compile(PHONE_FORMAT);
+        Matcher matcher=pattern.matcher(target);
+
+        return matcher.find();
     }
     public static boolean isAlphabet(String word){
         int code=word.toUpperCase().charAt(0);
