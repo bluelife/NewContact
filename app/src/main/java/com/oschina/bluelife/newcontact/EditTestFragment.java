@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.oschina.bluelife.newcontact.Utils.ContactManager;
@@ -42,6 +43,8 @@ public class EditTestFragment extends Fragment {
     EditText contactEdit;
     @BindView(R.id.qr_edit)
     EditText qrEdit;
+    @BindView(R.id.search_result)
+    TextView resultText;
     MainActivity mainActivity;
 
     @Nullable
@@ -68,10 +71,18 @@ public class EditTestFragment extends Fragment {
         EditTestFragmentPermissionsDispatcher.openContactWithCheck(this);
     }
 
+    @OnClick(R.id.search_name)
+    void onSearch(){
+        String name = contactEdit.getText().toString();
+        Log.w("search",name);
+        boolean hasContact = ContactManager.searchByLookUp(getActivity().getContentResolver(), name);
+        resultText.setText("result:"+(hasContact?"true":"false"));
+    }
+
     @NeedsPermission({Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS,Manifest.permission.CAMERA})
     void openContact() {
         String name = contactEdit.getText().toString();
-        boolean hasContact = ContactManager.contactExists(getActivity().getContentResolver(), name);
+        boolean hasContact = ContactManager.searchByLookUp(getActivity().getContentResolver(), name);
         if (hasContact) {
             Bundle bundle = new Bundle();
             bundle.putString(AddExistContactFragment.KEY_NAME, name);

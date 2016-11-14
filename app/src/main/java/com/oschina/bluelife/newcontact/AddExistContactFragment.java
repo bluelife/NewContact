@@ -71,7 +71,7 @@ public class AddExistContactFragment extends Fragment {
         ContactFetcher fetcher=new ContactFetcher(getContext());
 
         boolean hasContact= ContactManager.contactExists(getActivity().getContentResolver(),name);
-        Log.w("ttttttt"," "+hasContact+" ,"+name);
+
         if(hasContact){
             person=fetcher.fetchSingle(name);
             Log.w("ttttttt",""+person.name);

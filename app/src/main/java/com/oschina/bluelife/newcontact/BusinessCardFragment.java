@@ -132,28 +132,30 @@ public class BusinessCardFragment extends Fragment {
         logoManager=new LogoManager(getContext());
         ContactFetcher fetcher=new ContactFetcher(getContext());
         person=fetcher.fetchSingle(index);
-        Cursor cursor=logoManager.query(Long.parseLong(person.rowId));
-        if(cursor!=null) {
-            Log.w("savedlogo",cursor.moveToFirst()+" "+cursor);
-            if(cursor.moveToFirst()) {
-                OrgLogo orgLogo = OrgLogo.FACTORY.select_LogoMapper().map(cursor);
-                logoPath=orgLogo.image();
-                hasLogo=true;
-                Log.w("savedlogo",logoPath+"");
+        if(person!=null) {
+            Cursor cursor = logoManager.query(Long.parseLong(person.rowId));
+            if (cursor != null) {
+                Log.w("savedlogo", cursor.moveToFirst() + " " + cursor);
+                if (cursor.moveToFirst()) {
+                    OrgLogo orgLogo = OrgLogo.FACTORY.select_LogoMapper().map(cursor);
+                    logoPath = orgLogo.image();
+                    hasLogo = true;
+                    Log.w("savedlogo", logoPath + "");
+                }
+                cursor.close();
             }
-            cursor.close();
-        }
-        //Vcard vcard= BusinessCardSource.get().getCard(index);
-        name.setText(person.name);
-        place.setText(person.title);
-        company.setText(person.company);
-        mobilephone.setText(person.phone);
-        linephone.setText(person.homePhone);
-        email.setText(person.email);
-        website.setText(person.url);
-        address.setText(person.address);
+            //Vcard vcard= BusinessCardSource.get().getCard(index);
+            name.setText(person.name);
+            place.setText(person.title);
+            company.setText(person.company);
+            mobilephone.setText(person.phone);
+            linephone.setText(person.homePhone);
+            email.setText(person.email);
+            website.setText(person.url);
+            address.setText(person.address);
 
-        createQRLogo();
+            createQRLogo();
+        }
     }
     private void createQRLogo(){
         Bitmap bmp = getIcon();

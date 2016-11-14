@@ -333,9 +333,10 @@ public class ContactManager {
                 cur.close();
         }
         return false;*/
-        String where = Data.DISPLAY_NAME + " = ? ";
+        //String where = Data.DISPLAY_NAME + " = ? ";
+        String where = StructuredName.DISPLAY_NAME + " = ? ";
         String[] whereParameters = new String[]{name};
-        Cursor cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI, null, where, whereParameters, null);
+        Cursor cursor = contentResolver.query(Data.CONTENT_URI, null, where, whereParameters, null);
         boolean exist=false;
         if(cursor!=null){
             if(cursor.moveToFirst())
@@ -345,6 +346,18 @@ public class ContactManager {
         else
             exist=false;
         return exist;
+    }
+    public static boolean searchByLookUp(ContentResolver contentResolver,String name){
+        String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" like'%" + name +"%'";
+        String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER};
+        Cursor c = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                projection, selection, null, null);
+        if (c.moveToFirst()) {
+            c.close();
+            return true;
+        }
+        c.close();
+        return false;
     }
     public static boolean checkWebsiteExist(Context context,String id){
         final String[] projection=new String[]{
